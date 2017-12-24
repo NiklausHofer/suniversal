@@ -1,9 +1,9 @@
 /*
-	scan code converter
-	Copyright (c) 2017, Alexander Vollschwitz
+    scan code converter
+    Copyright (c) 2017, Alexander Vollschwitz
 
     based on Arduino Keyboard library, Copyright (c) 2015, Arduino LLC
-  	https://github.com/arduino-libraries/Keyboard
+    https://github.com/arduino-libraries/Keyboard
 
     This file is part of suniversal.
 
@@ -62,49 +62,49 @@ static const uint8_t hidReportDescriptor[] PROGMEM = {
 };
 
 /*
-	KEY REPORT
+    KEY REPORT
  */
 KeyReport::KeyReport() {
-	releaseAll();
+    releaseAll();
 }
 
 /*
-	Sets or clears bit in modifiers byte according to m. Returns
-	true if m is a modifier, i.e. non-zero, false otherwise.
+    Sets or clears bit in modifiers byte according to m. Returns
+    true if m is a modifier, i.e. non-zero, false otherwise.
  */
 bool KeyReport::handleModifier(uint8_t m, bool pressed) {
 
     DPRINT("KeyReport.handleModifier: " +
-    	String(m, HEX) + ", " + String(pressed));
+        String(m, HEX) + ", " + String(pressed));
 
-	if (m == 0) {
-	    DPRINTLN(" --> not a modifier");
-		return false;
-	}
+    if (m == 0) {
+        DPRINTLN(" --> not a modifier");
+        return false;
+    }
 
-	if (pressed) {
-		data.modifiers |= m;
-	} else {
-		data.modifiers &= ~m;
-	}
+    if (pressed) {
+        data.modifiers |= m;
+    } else {
+        data.modifiers &= ~m;
+    }
 
     DPRINTLN();
-	return true;
+    return true;
 }
 
 /*
-	Handle key k, adding or removing it to the report, according to
-	pressed. Returns true if k was handled,	false otherwise.
+    Handle key k, adding or removing it to the report, according to
+    pressed. Returns true if k was handled, false otherwise.
  */
 bool KeyReport::handleKey(uint8_t k, bool pressed) {
-	if (k == 0) {
-		return false;
-	}
-	if (pressed) {
-		return addKey(k);
-	} else {
-		return removeKey(k);
-	}
+    if (k == 0) {
+        return false;
+    }
+    if (pressed) {
+        return addKey(k);
+    } else {
+        return removeKey(k);
+    }
 }
 
 /*
@@ -116,26 +116,26 @@ bool KeyReport::addKey(uint8_t k) {
 
     DPRINT("KeyReport.addKey: " + String(k, HEX));
 
-	uint8_t value;
-	int8_t slot = -1, i;
+    uint8_t value;
+    int8_t slot = -1, i;
 
-	for (i = 0; i < array_len(data.keys); i++) {
-		value = data.keys[i];
-		if (slot == -1 && value == 0) {
-			slot = i;
-		} else if (value == k) {
-			break;
-		}
-	}
+    for (i = 0; i < array_len(data.keys); i++) {
+        value = data.keys[i];
+        if (slot == -1 && value == 0) {
+            slot = i;
+        } else if (value == k) {
+            break;
+        }
+    }
 
-	if (i == array_len(data.keys) && slot > -1) {
-	    DPRINTLN(" --> adding at slot " + String(slot));
-		data.keys[slot] = k;
-		return true;
-	}
+    if (i == array_len(data.keys) && slot > -1) {
+        DPRINTLN(" --> adding at slot " + String(slot));
+        data.keys[slot] = k;
+        return true;
+    }
 
     DPRINTLN(" --> not adding, slot=" + String(slot) + ", i=" + String(i));
-	return false;
+    return false;
 }
 
 /*
@@ -145,33 +145,33 @@ bool KeyReport::removeKey(uint8_t k) {
 
     DPRINT("KeyReport.removeKey: " + String(k, HEX));
 
-	for (uint8_t i = 0; i < array_len(data.keys); i++) {
-		if (data.keys[i] == k) {
-		    DPRINTLN(" --> removing from slot " + String(i));
-			data.keys[i] = 0;
-			return true;
-		}
-	}
+    for (uint8_t i = 0; i < array_len(data.keys); i++) {
+        if (data.keys[i] == k) {
+            DPRINTLN(" --> removing from slot " + String(i));
+            data.keys[i] = 0;
+            return true;
+        }
+    }
 
     DPRINTLN(" --> not found");
-	return false;
+    return false;
 }
 
 /*
-	Clear all keys and reset modifier bits.
+    Clear all keys and reset modifier bits.
  */
 KeyReport::releaseAll() {
-	memset(data.keys, 0, sizeof(data.keys));
-	data.modifiers = 0;
+    memset(data.keys, 0, sizeof(data.keys));
+    data.modifiers = 0;
 }
 
 KeyReport::send() {
-	HID().SendReport(2, &data, sizeof(ReportData));
+    HID().SendReport(2, &data, sizeof(ReportData));
     DPRINT("KeyReport.send: modifiers=" +
-    	String(data.modifiers, HEX) + ", keys=[");
+        String(data.modifiers, HEX) + ", keys=[");
     #ifdef DEBUG
     for (uint8_t i = 0; i < array_len(data.keys); i++) {
-	    DPRINT(" " + String(data.keys[i], HEX));
+        DPRINT(" " + String(data.keys[i], HEX));
     }
     #endif
     DPRINTLN(" ]");
@@ -181,8 +181,8 @@ KeyReport::send() {
 // CONVERTER
 //
 Converter::Converter() {
-	static HIDSubDescriptor node(hidReportDescriptor, sizeof(hidReportDescriptor));
-	HID().AppendDescriptor(&node);
+    static HIDSubDescriptor node(hidReportDescriptor, sizeof(hidReportDescriptor));
+    HID().AppendDescriptor(&node);
 }
 
 /*
@@ -195,24 +195,24 @@ Converter::Converter() {
     any more.
  */
 Converter::handleKey(uint8_t sunKey, bool pressed) {
-	uint16_t usbKey = sun2usb[sunKey];
+    uint16_t usbKey = sun2usb[sunKey];
     DPRINTLN("Converter.handleKey: " +
-    	String(sunKey, HEX) + " --> " + String(usbKey, HEX));
-	if (usbKey > 0) {
-		// modifiers are in high byte, non-modifiers in low byte
-		if (keyReport.handleModifier(usbKey >> 8, pressed) ||
-			keyReport.handleKey(0xFF & usbKey, pressed)) {
-			keyReport.send();
-		}
-	}
+        String(sunKey, HEX) + " --> " + String(usbKey, HEX));
+    if (usbKey > 0) {
+        // modifiers are in high byte, non-modifiers in low byte
+        if (keyReport.handleModifier(usbKey >> 8, pressed) ||
+            keyReport.handleKey(0xFF & usbKey, pressed)) {
+            keyReport.send();
+        }
+    }
 }
 
 /*
-	Clear report and send it.
+    Clear report and send it.
  */
 Converter::releaseAll() {
-	keyReport.releaseAll();
-	keyReport.send();
+    keyReport.releaseAll();
+    keyReport.send();
 }
 
 Converter converter;

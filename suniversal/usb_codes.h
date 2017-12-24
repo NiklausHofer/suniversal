@@ -1,17 +1,17 @@
 /*
-	USB HID Keyboard scan codes as per USB spec 1.11, plus some additional codes
+    USB HID Keyboard scan codes as per USB spec 1.11, plus some additional codes
 
-	adapted from:
-		https://gist.github.com/MightyPork/6da26e382a7ad91b5496ee55fdc73db2
-		https://source.android.com/devices/input/keyboard-devices.html
+    adapted from:
+        https://gist.github.com/MightyPork/6da26e382a7ad91b5496ee55fdc73db2
+        https://source.android.com/devices/input/keyboard-devices.html
  */
 
 #ifndef USB_HID_KEYS
 #define USB_HID_KEYS
 
 /*
-	modifier masks - used for the first byte in the HID report.
-	NOTE: second byte in the report is reserved, 0x00
+    modifier masks - used for the first byte in the HID report.
+    NOTE: second byte in the report is reserved, 0x00
  */
 #define USB_MOD_LCTRL  0x01
 #define USB_MOD_LSHIFT 0x02
@@ -23,11 +23,11 @@
 #define USB_MOD_RMETA  0x80
 
 /*
-	scan codes - last N slots in the HID report (usually 6).
-	0x00 if no key pressed.
+    scan codes - last N slots in the HID report (usually 6).
+    0x00 if no key pressed.
 
-	If more than N keys are pressed, the HID reports
-	USB_ERR_OVF in all slots to indicate this condition.
+    If more than N keys are pressed, the HID reports
+    USB_ERR_OVF in all slots to indicate this condition.
  */
 
 #define USB_NONE 0x00 // No key pressed
