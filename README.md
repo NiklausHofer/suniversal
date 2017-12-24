@@ -22,10 +22,12 @@ I decided to put the *Arduino* into the keyboard case (had to open it anyway for
 
 The most challenging part may be finding the right plug to connect to the PCB. I fabricated something out of a connector that had the right pitch.
 
+![connector](connector.jpg)
+
 
 ## Software
 
-Analyzing *SunType5_ArduinoAdapter*, I realized that the limitations were rooted in the use of the *Arduino* Keyboard library for the conversion to USB. Not that the library itself is in any way limited, it's just that is is designed for a different use case - turning `Print`ed characters into key strokes. But what we need here is actually much simpler - just a plain scan code converter. So I merged *SunType5_ArduinoAdapter* and the Keyboard library and started refactoring the code. The result is this project.
+Analyzing *SunType5_ArduinoAdapter*, I realized that the limitations were rooted in the use of the *Arduino* Keyboard library for the conversion to USB. Not that the library itself is in any way limited, it's just that is designed for a different use case - turning `Print`ed characters into key strokes. But what we need here is actually much simpler - just a plain scan code converter. So I merged *SunType5_ArduinoAdapter* and the Keyboard library and started refactoring the code. The result is this project.
 
 #### Debug Mode
 To see debug messages on the *Arduino*'s serial port, uncomment the `// #define DEBUG` line in `suniversal.h`.
