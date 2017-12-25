@@ -9,7 +9,7 @@ A couple of years back, I bought a *SUN Type 5* keyboard at the *VCFe* flea mark
 
 
 ## Hardware
-I decided to put the *Arduino* into the keyboard case (had to open it anyway for cleaning). The original cable can be unplugged from the keyboard's PCB, so it's easy to revert the modification should I ever desire to do so. The only thing to fabricate was a very simple harness to connect the *Arduino* with the PCB:
+I finally settled for the *Arduino Pro Micro*. The *Micro* may also work, but I haven't tested that. Whichever board you choose, make sure it's 5V, since the RS232 signals from the keyboard are 5V TTL levels! I decided to put the *Arduino* into the keyboard case (had to open it for cleaning anyway). The original cable can be unplugged from the keyboard's PCB, so it's easy to revert the modification should I ever desire to do so. The only thing to fabricate was a very simple harness to connect the *Arduino* with the PCB:
 
 | PCB pin | wire color* | function   | *Arduino* pin  |
 |---------|-------------|------------|----------------|
@@ -47,3 +47,8 @@ Here a few ideas I may implement in the future:
 - add second table with US scan set
 - support key macros
 - actual compose mode
+
+
+## Resources
+
+- [SUN 5 Keyboard spec](http://sparc.org/wp-content/uploads/2014/01/KBD.pdf.gz)
