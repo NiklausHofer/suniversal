@@ -35,7 +35,7 @@ To see debug messages on the *Arduino*'s serial port, uncomment the `// #define 
 
 ## Gotchas
 
-- The translation table is based on the international scan set. I have the German version of the keyboard, so I currently only test with that. You may have to adapt the table if your keyboard is a US version.
+- I currently only have the German version of the keyboard, so I can only test with that one. Feedback about whether this works with other layouts as intended would be very welcome.
 
 - Special keys such as *Stop*, *Again*, or *Undo*, are mapped to their closest USB code. Whether that has the desired result depends on your OS. You may have to configure it accordingly. On my *Ubuntu* box for example, I configured keyboard shortcuts for the audio and power keys in the keyboard settings.
 
@@ -44,7 +44,6 @@ To see debug messages on the *Arduino*'s serial port, uncomment the `// #define 
 
 Here a few ideas I may implement in the future:
 
-- add second table with US scan set
 - support key macros
 - actual compose mode
 

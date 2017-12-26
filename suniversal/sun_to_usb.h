@@ -21,13 +21,20 @@
 #include "usb_codes.h"
 
 /*
-    scan code lookup table: index is SUN scan code, using the
-    International Scan Set as per keyboard documentation, value
-    at index is USB scan code as 16 bit unsigned int, where:
+    scan code lookup table:
 
-    - modifiers are stored in high byte, with low byte 0
-    - non-modifiers are stored on low byte, with high byte 0
+     - index is SUN scan code
+     - value at index is USB scan code as 16 bit unsigned int,
+       where:
+        - modifiers are stored in high byte, with low byte 0
+        - non-modifiers are stored on low byte, with high byte 0
 
+    The scan codes are according to the keyboard documentation. Note that
+    while the documentation lists two scan sets - US and International -
+    we really just need one table here. As the documentation states, the
+    scan sets are about key-switch to scan code assignments, but we're
+    concerned with translating scan codes. From all I can tell, those are
+    the same in each of the two scan sets.
  */
 static const uint16_t sun2usb[128] = {
 /*  scan                                        */
