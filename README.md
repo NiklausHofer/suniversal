@@ -27,7 +27,7 @@ The most challenging part may be finding the right plug to connect to the PCB. I
 
 ## Software
 
-Analyzing *SunType5_ArduinoAdapter*, I realized that the limitations were rooted in the use of the *Arduino* Keyboard library for the conversion to USB. Not that the library itself is in any way limited, it's just that is designed for a different use case - turning `Print`ed characters into key strokes. But what we need here is actually much simpler - just a plain scan code converter. So I merged *SunType5_ArduinoAdapter* and the Keyboard library and started refactoring the code. The result is this project.
+Analyzing *SunType5_ArduinoAdapter*, I realized that the limitations were rooted in the use of the *Arduino* Keyboard library for the conversion to USB. Not that the library itself is in any way limited, it's just that it is designed for a different use case - turning `Print`ed characters into key strokes. But what we need here is actually much simpler - just a plain scan code converter. So I merged *SunType5_ArduinoAdapter* and the Keyboard library and started refactoring the code. The result is this project.
 
 #### Configuration
 There are a few settings you can make in `suniversal.h`, the more interesting ones being:
@@ -50,7 +50,7 @@ There are a few settings you can make in `suniversal.h`, the more interesting on
 
 ## Contributing
 
-If you find any bugs or have ideas for new features, I'd be happy to receive your pull requests. Also, currently I only have the German version of the keyboard, so I can only test with that one. Feedback about whether everything works with other layouts as intended would be very welcome.
+If you find any bugs or have ideas for new features, I'd be happy to receive your issues or pull requests. Also, currently I only have the German version of the keyboard, so I can only test with that one. Feedback about whether everything works with other layouts as intended would be very welcome.
 
 
 ## Resources
