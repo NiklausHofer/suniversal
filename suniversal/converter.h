@@ -45,6 +45,8 @@ class KeyReport {
 
 private:
     ReportData data;
+    bool addKey(uint8_t k);
+    bool removeKey(uint8_t k);
 
 public:
     KeyReport();
@@ -52,10 +54,6 @@ public:
     bool handleKey(uint8_t k, bool pressed);
     releaseAll();
     send();
-
-private:
-    bool addKey(uint8_t k);
-    bool removeKey(uint8_t k);
 };
 
 
@@ -66,9 +64,11 @@ class Converter {
 
 private:
     KeyReport keyReport;
+    bool handleMacro(uint16_t k, bool pressed);
 
 public:
     Converter();
+    setLayout(uint8_t layout);
     handleKey(uint8_t k, bool pressed);
     releaseAll();
 };

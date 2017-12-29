@@ -6,8 +6,8 @@
         https://source.android.com/devices/input/keyboard-devices.html
  */
 
-#ifndef USB_HID_KEYS
-#define USB_HID_KEYS
+#ifndef USB_CODES_h
+#define USB_CODES_h
 
 /*
     modifier masks - used for the first byte in the HID report.
@@ -31,7 +31,9 @@
  */
 
 #define USB_NONE 0x00 // No key pressed
-#define USB_ERR_OVF 0x01 //  Keyboard Error Roll Over - used for all slots if too many keys are pressed ("Phantom key")
+// Keyboard Error Roll Over - used for all slots if too many keys
+// are pressed ("Phantom key")
+#define USB_ERR_OVF 0x01
 // 0x02 //  Keyboard POST Fail
 // 0x03 //  Keyboard Error Undefined
 #define USB_A 0x04 // Keyboard a and A

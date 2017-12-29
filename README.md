@@ -29,23 +29,28 @@ The most challenging part may be finding the right plug to connect to the PCB. I
 
 Analyzing *SunType5_ArduinoAdapter*, I realized that the limitations were rooted in the use of the *Arduino* Keyboard library for the conversion to USB. Not that the library itself is in any way limited, it's just that is designed for a different use case - turning `Print`ed characters into key strokes. But what we need here is actually much simpler - just a plain scan code converter. So I merged *SunType5_ArduinoAdapter* and the Keyboard library and started refactoring the code. The result is this project.
 
-#### Debug Mode
-To see debug messages on the *Arduino*'s serial port, uncomment the `// #define DEBUG` line in `suniversal.h`.
+#### Configuration
+There are a few settings you can make in `suniversal.h`, the more interesting ones being:
+
+- `USE_MACROS` - When enabled, this assigns *macros* (short key stroke sequences) instead of the single USB key codes, to the special keys in the fun cluster (the eleven keys on the left). This is because mostly, those don't seem to have any effect unless you make according settings in the OS. So instead of sending e.g. USB_COPY, USB_CONTROL and USB_C will be sent. To add your own macros, have a look at `macros.cpp`. Macros are enabled by default.
+
+- `NUM_LOCK_ON` - This determines whether NumLock will be on or off after power on. Defaults to on.
+
+- `DEBUG` - You can enable debug mode with this, which will put diagnostic messages on the serial port. Additionally, the power key will turn into a reset button for the keyboard, so it's easier to observe start up messages. This is off by default.
 
 
 ## Gotchas
 
-- I currently only have the German version of the keyboard, so I can only test with that one. Feedback about whether this works with other layouts as intended would be very welcome.
+- Special keys such as the audio and power keys are mapped to their closest USB code. Whether that has the desired result depends on your OS. You may have to configure it accordingly. On my *Ubuntu* box for example, I configured keyboard shortcuts for the audio and power keys in the keyboard settings. The keys in the fun cluster (*Stop*, *Again*, *Undo* etc.) have macros assigned by default, so they should work without making any settings, unless you turn macros off.
 
-- Special keys such as *Stop*, *Again*, or *Undo*, are mapped to their closest USB code. Whether that has the desired result depends on your OS. You may have to configure it accordingly. On my *Ubuntu* box for example, I configured keyboard shortcuts for the audio and power keys in the keyboard settings.
+- The Compose key should by default invoke context menus, and the LED will not light up. If you're assigning this key on the host to invoke actual compose mode, have a look at the `COMPOSE_MODE` setting to get the LED working.
+
+- The keyboard cannot receive commands from the host, since the *Arduino* HID library currently does not support that. However, that should only mean that if the host wants to change the state of the keyboard LEDs, then that won't be reflected. For example, when you're using a second keyboard and press *Caps Lock* on it, the *Caps Lock* LED on the SUN keyboard won't light up. But why would you use another keyboard when you have your Type 5 right in front of you... ;-)
 
 
-## Further Development
+## Contributing
 
-Here a few ideas I may implement in the future:
-
-- support key macros
-- actual compose mode
+If you find any bugs or have ideas for new features, I'd be happy to receive your pull requests. Also, currently I only have the German version of the keyboard, so I can only test with that one. Feedback about whether everything works with other layouts as intended would be very welcome.
 
 
 ## Resources

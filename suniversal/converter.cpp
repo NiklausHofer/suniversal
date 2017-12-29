@@ -24,13 +24,13 @@
 #include "suniversal.h"
 #include "converter.h"
 #include "sun_to_usb.h"
+#include "macros.h"
 
 #define array_len( x )  ( sizeof( x ) / sizeof( *x ) )
 
 #if defined(_USING_HID)
 
 static const uint8_t hidReportDescriptor[] PROGMEM = {
-// TODO check maxima
     0x05, 0x01, // USAGE_PAGE (Generic Desktop)  // 47
     0x09, 0x06, // USAGE (Keyboard)
     0xa1, 0x01, // COLLECTION (Application)
@@ -60,6 +60,8 @@ static const uint8_t hidReportDescriptor[] PROGMEM = {
     0x81, 0x00, //   INPUT (Data, Ary, Abs)
     0xc0,       // END_COLLECTION
 };
+
+MacroTable macros;
 
 /*
     KEY REPORT
@@ -169,11 +171,11 @@ KeyReport::send() {
     HID().SendReport(2, &data, sizeof(ReportData));
     DPRINT("KeyReport.send: modifiers=" +
         String(data.modifiers, HEX) + ", keys=[");
-    #ifdef DEBUG
-    for (uint8_t i = 0; i < array_len(data.keys); i++) {
-        DPRINT(" " + String(data.keys[i], HEX));
+    if (DEBUG) {
+        for (uint8_t i = 0; i < array_len(data.keys); i++) {
+            DPRINT(" " + String(data.keys[i], HEX));
+        }
     }
-    #endif
     DPRINTLN(" ]");
 }
 
@@ -185,26 +187,58 @@ Converter::Converter() {
     HID().AppendDescriptor(&node);
 }
 
-/*
-    If pressed, add the specified key to the key report and send the report. Because
-    of the way USB HID works, the host acts as if the key remains pressed until we
-    clear the report and resend.
+Converter::setLayout(uint8_t layout) {
+    macros.adjustToLayout(layout);
+}
 
-    If not pressed, take the specified key out of the key report and send the report.
-    This tells the OS the key is no longer pressed and that it shouldn't be repeated
-    any more.
+/*
+    If pressed, add the specified key to the key report and send the report.
+    Because of the way USB HID works, the host acts as if the key remains pressed
+    until we clear the report and resend.
+
+    If not pressed, take the specified key out of the key report and send the
+    report. This tells the OS the key is no longer pressed and that it shouldn't
+    be repeated any more.
  */
 Converter::handleKey(uint8_t sunKey, bool pressed) {
     uint16_t usbKey = sun2usb[sunKey];
     DPRINTLN("Converter.handleKey: " +
         String(sunKey, HEX) + " --> " + String(usbKey, HEX));
     if (usbKey > 0) {
+        if (USE_MACROS && handleMacro(usbKey, pressed)) {
+            return;
+        }
         // modifiers are in high byte, non-modifiers in low byte
         if (keyReport.handleModifier(usbKey >> 8, pressed) ||
             keyReport.handleKey(0xFF & usbKey, pressed)) {
             keyReport.send();
         }
     }
+}
+
+/*
+
+ */
+bool Converter::handleMacro(uint16_t k, bool pressed) {
+
+    DPRINT("Converter.handleMacro: " +
+        String(k, HEX) + ", " + String(pressed));
+    if ((k & 0xFF00) != 0xFF00) {
+        DPRINTLN(" --> not a macro");
+        return false;
+    }
+    DPRINTLN();
+
+    uint16_t* macro = macros.get(0xFF & k);
+    for (uint8_t i = 0; macro[i] > 0; i++) {
+        uint16_t m = macro[i];
+        if (keyReport.handleModifier(m >> 8, pressed) ||
+            keyReport.handleKey(0xFF & m, pressed)) {
+            keyReport.send();
+        }
+    }
+
+    return true;
 }
 
 /*

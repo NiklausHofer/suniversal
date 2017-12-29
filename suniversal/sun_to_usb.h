@@ -18,16 +18,31 @@
     along with suniversal. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef SUN_TO_USB_h
+#define SUN_TO_USB_h
+
+#include "suniversal.h"
 #include "usb_codes.h"
+#include "macros.h"
+
+#if USE_MACROS == true
+#define CODE_OR_MACRO(C, M) (0xFF00 + (M))
+#else
+#define CODE_OR_MACRO(C, M) (C)
+#endif
 
 /*
     scan code lookup table:
 
      - index is SUN scan code
-     - value at index is USB scan code as 16 bit unsigned int,
-       where:
-        - modifiers are stored in high byte, with low byte 0
+
+     - value at index is USB scan code, modifier, or macro ID, as 16 bit
+       unsigned int, according to this scheme:
+
         - non-modifiers are stored on low byte, with high byte 0
+        - modifiers are stored in high byte, with low byte 0
+        - 0xFF in high byte indicates that a macro is to be used, low
+          byte in this case is the ID of the macro
 
     The scan codes are according to the keyboard documentation. Note that
     while the documentation lists two scan sets - US and International -
@@ -41,9 +56,9 @@ static const uint16_t sun2usb[128] = {
 /*  code    meaning          translation to USB */
 /*  --------------------------------------------*/
 /*  0x00                    */  0,
-/*  0x01    Stop            */  USB_STOP,
+/*  0x01    Stop            */  CODE_OR_MACRO(USB_STOP, MACRO_STOP),
 /*  0x02    Volume_Decr     */  USB_VOLUMEDOWN,
-/*  0x03    Again           */  USB_AGAIN,
+/*  0x03    Again           */  CODE_OR_MACRO(USB_AGAIN, MACRO_AGAIN),
 /*  0x04    Volume_Incr     */  USB_VOLUMEUP,
 /*  0x05    F1              */  USB_F1,
 /*  0x06    F2              */  USB_F2,
@@ -65,8 +80,8 @@ static const uint16_t sun2usb[128] = {
 /*  0x16    Pr_Sc           */  USB_SYSRQ,
 /*  0x17    Break/ScrollLock*/  USB_SCROLLLOCK,
 /*  0x18    T5_Left         */  USB_LEFT,
-/*  0x19    Props           */  USB_PROPS,
-/*  0x1A    Undo            */  USB_UNDO,
+/*  0x19    Props           */  CODE_OR_MACRO(USB_PROPS, MACRO_PROPS),
+/*  0x1A    Undo            */  CODE_OR_MACRO(USB_UNDO, MACRO_UNDO),
 /*  0x1B    T5_Down         */  USB_DOWN,
 /*  0x1C    T5_Right        */  USB_RIGHT,
 /*  0x1D    Esc             */  USB_ESC,
@@ -89,9 +104,9 @@ static const uint16_t sun2usb[128] = {
 /*  0x2E    /               */  USB_KPSLASH,
 /*  0x2F    *               */  USB_KPASTERISK,
 /*  0x30    Power           */  USB_POWER,
-/*  0x31    Front           */  USB_FRONT,
-/*  0x32    Del_.           */  USB_DELETE,
-/*  0x33    Copy            */  USB_COPY,
+/*  0x31    Front           */  CODE_OR_MACRO(USB_FRONT, MACRO_FRONT),
+/*  0x32    Del_.           */  USB_KPDOT,
+/*  0x33    Copy            */  CODE_OR_MACRO(USB_COPY, MACRO_COPY),
 /*  0x34    T5_Home         */  USB_HOME,
 /*  0x35    Tab             */  USB_TAB,
 /*  0x36    Q               */  USB_Q,
@@ -103,7 +118,7 @@ static const uint16_t sun2usb[128] = {
 /*  0x3C    U               */  USB_U,
 /*  0x3D    I               */  USB_I,
 /*  0x3E    O               */  USB_O,
-/*  0x3F    Paste           */  USB_P,
+/*  0x3F    P               */  USB_P,
 /*  0x40    [_{             */  USB_LEFTBRACE,
 /*  0x41    ]_}             */  USB_RIGHTBRACE,
 /*  0x42    Delete          */  USB_DELETE,
@@ -112,8 +127,8 @@ static const uint16_t sun2usb[128] = {
 /*  0x45    up-cur_8        */  USB_KP8,
 /*  0x46    PgUp_9          */  USB_KP9,
 /*  0x47    -               */  USB_KPMINUS,
-/*  0x48    Open            */  USB_OPEN,
-/*  0x49    Paste           */  USB_PASTE,
+/*  0x48    Open            */  CODE_OR_MACRO(USB_OPEN, MACRO_OPEN),
+/*  0x49    Paste           */  CODE_OR_MACRO(USB_COPY, MACRO_PASTE),
 /*  0x4A    T5_End          */  USB_END,
 /*  0x4B                    */  0,
 /*  0x4C    Ctrl_L          */  USB_MOD_LCTRL << 8,
@@ -134,10 +149,10 @@ static const uint16_t sun2usb[128] = {
 /*  0x5B    Left-Cur_4      */  USB_KP4,
 /*  0x5C    5               */  USB_KP5,
 /*  0x5D    Right-Cur_6     */  USB_KP6,
-/*  0x5E    Ins_0           */  USB_INSERT,
-/*  0x5F    Find            */  USB_FIND,
+/*  0x5E    Ins_0           */  USB_KP0,
+/*  0x5F    Find            */  CODE_OR_MACRO(USB_FIND, MACRO_FIND),
 /*  0x60    T5_PgUp         */  USB_PAGEUP,
-/*  0x61    Cut             */  USB_CUT,
+/*  0x61    Cut             */  CODE_OR_MACRO(USB_CUT, MACRO_CUT),
 /*  0x62    Num_Lock        */  USB_NUMLOCK,
 /*  0x63    Shift_L         */  USB_MOD_LSHIFT << 8,
 /*  0x64    Z               */  USB_Z,
@@ -158,7 +173,7 @@ static const uint16_t sun2usb[128] = {
 /*  0x73                    */  0,
 /*  0x74                    */  0,
 /*  0x75                    */  0,
-/*  0x76    Help            */  USB_HELP,
+/*  0x76    Help            */  CODE_OR_MACRO(USB_HELP, MACRO_HELP),
 /*  0x77    CapsLock        */  USB_CAPSLOCK,
 /*  0x78    L-Triangle      */  USB_MOD_LMETA << 8,
 /*  0x79    SpaceBar        */  USB_SPACE,
@@ -169,3 +184,5 @@ static const uint16_t sun2usb[128] = {
 /*  0x7E                    */  0,
 /*  0x7F                    */  0
 };
+
+#endif

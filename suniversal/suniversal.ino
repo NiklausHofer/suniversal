@@ -32,6 +32,9 @@
 #define PIN_RX 10
 #define PIN_TX  9
 
+// SUN power key
+#define POWER            0x30
+
 // SUN toggle keys
 #define NUM_LOCK         0x62
 #define NUM_LOCK_MASK    0x01
@@ -57,6 +60,9 @@
 #define KBD_LAYOUT_RESP  0xFE
 #define KBD_RESET_RESP   0xFF
 
+// key break bit is bit 7
+#define BREAK_BIT        0x80
+
 // LED command sequence
 uint8_t cmdLED[2] = {CMD_LED, 0x00};
 
@@ -66,12 +72,23 @@ SoftwareSerial sun(PIN_RX, PIN_TX, true);
 // SNAFU flag
 bool keyboardBroken = false;
 
+// for turning off Compose key after next two key strokes
+uint8_t count_to_compose_off = 0;
+
+//
 void setup() {
-    #ifdef SERIAL_DEBUG
-    Serial.begin(1200);
-    #endif
+
+    if (DEBUG) {
+        Serial.begin(1200);
+    }
+
     sun.begin(1200);
     resetKeyboard();
+
+    if (NUM_LOCK_ON) {
+        toggleLEDs(NUM_LOCK_MASK);
+        handleKey(NUM_LOCK);
+    }
 }
 
 /*
@@ -83,32 +100,98 @@ void setup() {
  */
 void resetKeyboard() {
 
+    DPRINTLN("resetting keyboard");
+
     // read anything that may have come in after power-up
-    clearInputBuffer();
+    clearFromBuffer(0);
     sun.write(CMD_RESET);
 
-    // wait for response
-    while (sun.available() < 1) {
-        delay(50);
-    }
-
     // if first byte is keyboard reset response, we consider that success
-    if (sun.read() == KBD_RESET_RESP) {
-        clearInputBuffer(); // read extraneous bytes
+    if (waitAndRead() == KBD_RESET_RESP) {
+
+        DPRINTLN("keyboard ok");
+        // wait for & discard the remainder of the response
+        waitForResponse(2);
+        clearFromBuffer(2);
+
+        if (USE_MACROS) {
+            converter.setLayout(getLayout());
+        }
+
         sun.write(cmdLED, 2); // reset LEDs
-        flashLEDs(CAPS_LOCK_MASK);
-        flashLEDs(SCROLL_LOCK_MASK);
-        flashLEDs(NUM_LOCK_MASK);
-        flashLEDs(COMPOSE_MASK);
-        flashLEDs(ALL_LEDS);
-        beep(75);
-        beep(75);
+
+        if (STARTUP_GREETING) {
+            flashLEDs(CAPS_LOCK_MASK);
+            flashLEDs(SCROLL_LOCK_MASK);
+            flashLEDs(NUM_LOCK_MASK);
+            flashLEDs(COMPOSE_MASK);
+            flashLEDs(ALL_LEDS);
+            beep(75);
+            beep(75);
+        }
+
     } else {
+        DPRINTLN("keyboard broken");
         keyboardBroken = true;
         for (uint8_t i = 0; i < 8; i++) {
             beep(125);
         }
     }
+}
+
+/*
+    Depending on the keyboard layout in use, we may have to adjust some of the
+    macros. For example, if we want to send Ctrl-Z to the host for an Undo, we
+    send the scan codes for Control and Z. If the keyboard layout however is for
+    example German, the Z and Y keys will be swapped, and the host will interpret
+    the scan code for Z actually as a Y, and we end up with Ctrl-Y (Redo).
+
+    Now there's no way of knowing what layout is active on the host, but in most
+    cases, it will be the same as is set in the keyboard itself. So we get the
+    layout from the keyboard here and pass it to the converter to make the
+    necessary adjustments (see resetKeyboard). If this is not not desired, you
+    can force a particular layout with the FORCE_LAYOUT setting in suniversal.h.
+ */
+uint8_t getLayout() {
+
+    if (FORCE_LAYOUT != GET_FROM_KEYBOARD) {
+        DPRINTLN("using forced layout: " + String(FORCE_LAYOUT));
+        return FORCE_LAYOUT;
+    }
+
+    sun.write(CMD_LAYOUT);
+
+    if (waitAndRead() != KBD_LAYOUT_RESP) {
+        DPRINTLN("could not determine keyboard layout, defaulting to US");
+        return UNITED_STATES;
+    }
+
+    // On the Type 5c I have, there are only 5 DIP switches, corresponding to
+    // bits 4 through 8 of the layout code. Bit 3 is always 1, and bits 2 and
+    // 1 are 0 per documentation anyway. Therefore masking out bits 1,2 and 3.
+    uint8_t l = waitAndRead() & 0x1F;
+
+    switch (l) {
+        case UNITED_STATES:
+        case FRENCH_BELGIUM:
+        case CANADA_FRENCH:
+        case DENMARK:
+        case GERMANY:
+        case ITALY:
+        case NETHERLANDS:
+        case NORWAY:
+        case PORTUGAL:
+        case SPAIN_LATIN_AMERICA:
+        case SWEDEN_FINLAND:
+        case SWISS_FRENCH:
+        case SWISS_GERMAN:
+        case UNITED_KINGDOM:
+            DPRINTLN("keyboard layout: " + String(l));
+            return l;
+    }
+
+    DPRINTLN("invalid keyboard layout: " + String(l) + ", defaulting to US");
+    return UNITED_STATES;
 }
 
 void loop() {
@@ -119,8 +202,17 @@ void loop() {
     }
 
     while (sun.available() > 0) {
+
         int key = sun.read();
+
         switch (key) {
+            case POWER:
+                if (DEBUG) {
+                    // in debug mode, power key resets keyboard
+                    resetKeyboard();
+                    return;
+                }
+                break;
             case CAPS_LOCK:
                 toggleLEDs(CAPS_LOCK_MASK);
                 break;
@@ -131,11 +223,29 @@ void loop() {
                 toggleLEDs(NUM_LOCK_MASK);
                 break;
             case COMPOSE:
-                toggleLEDs(COMPOSE_MASK);
+                if (COMPOSE_MODE) {
+                    toggleLEDs(COMPOSE_MASK);
+                    count_to_compose_off =
+                        (cmdLED[1] & COMPOSE_MASK) == 0 ? 0 : 3;
+                }
                 break;
             case -1: // shouldn't really happen
                 continue;
         }
+
+        // check on every key release whether Compose needs to be switched off
+        if ((key & BREAK_BIT) != 0) {
+            switch (count_to_compose_off) {
+                case 0:
+                    break;
+                case 1:
+                    toggleLEDs(COMPOSE_MASK);
+                default:
+                    count_to_compose_off--;
+                    break;
+            }
+        }
+
         handleKey(key);
     }
 }
@@ -145,8 +255,8 @@ void handleKey(uint8_t key) {
         DPRINTLN("suniversal: all released");
         converter.releaseAll();
     } else {
-        bool pressed = (key & 0x80) == 0; // break code if bit 7 set
-        key &= 0x7F; // mask break bit
+        bool pressed = (key & BREAK_BIT) == 0;
+        key &= (~BREAK_BIT); // mask out break bit
         DPRINT("suniversal: " + String(key, HEX));
         DPRINTLN(pressed ? " down" : " up");
         converter.handleKey(key, pressed);
@@ -173,8 +283,34 @@ void beep(unsigned long duration) {
     delay(duration);
 }
 
-void clearInputBuffer() {
-    while (sun.available() > 0) {
+/*
+    Clear `count` number of bytes from serial input buffer. Does not block if
+    there are less bytes present. If `count` is 0, clears all bytes present in
+    buffer. Returns number of bytes removed from buffer.
+ */
+uint8_t clearFromBuffer(int8_t count) {
+    for (uint8_t i = 0; sun.available() > 0; i++) {
+        if (count > 0 && i == count) {
+            return i;
+        }
         sun.read();
     }
+}
+
+/*
+    Waits until at least `expected` number of bytes are available in the serial
+    input buffer.
+ */
+void waitForResponse(uint8_t expected) {
+    while (sun.available() < expected) {
+        delay(50);
+    }
+}
+
+/*
+    Read a single byte form the serial connection. Wait if no byte is available.
+ */
+uint8_t waitAndRead() {
+    waitForResponse(1);
+    return sun.read();
 }
