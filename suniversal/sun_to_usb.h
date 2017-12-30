@@ -50,6 +50,9 @@
     scan sets are about key-switch to scan code assignments, but we're
     concerned with translating scan codes. From all I can tell, those are
     the same in each of the two scan sets.
+
+    Translations were set to the same USB scan codes that a SUN Type 7
+    keyboard sends.
  */
 static const uint16_t sun2usb[128] = {
 /*  scan                                        */

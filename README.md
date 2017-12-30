@@ -41,16 +41,32 @@ There are a few settings you can make in `suniversal.h`, the more interesting on
 
 ## Gotchas
 
-- Special keys such as the audio and power keys are mapped to their closest USB code. Whether that has the desired result depends on your OS. You may have to configure it accordingly. On my *Ubuntu* box for example, I configured keyboard shortcuts for the audio and power keys in the keyboard settings. The keys in the fun cluster (*Stop*, *Again*, *Undo* etc.) have macros assigned by default, so they should work without making any settings, unless you turn macros off.
+- Code translations were set to the same USB scan codes that a *SUN Type 7* keyboard sends. However, whether special keys such as the audio and power keys have the desired result depends on your OS. You may have to configure it accordingly. On my *Ubuntu* box for example, I configured keyboard shortcuts for the audio and power keys in the keyboard settings. The keys in the fun cluster (*Stop*, *Again*, *Undo* etc.) have macros assigned by default, so they should work without making any settings, unless you turn macros off.
 
 - The Compose key should by default invoke context menus, and the LED will not light up. If you're assigning this key on the host to invoke actual compose mode, have a look at the `COMPOSE_MODE` setting to get the LED working.
 
 - The keyboard cannot receive commands from the host, since the *Arduino* HID library currently does not support that. However, that should only mean that if the host wants to change the state of the keyboard LEDs, then that won't be reflected. For example, when you're using a second keyboard and press *Caps Lock* on it, the *Caps Lock* LED on the SUN keyboard won't light up. But why would you use another keyboard when you have your Type 5 right in front of you... ;-)
 
 
+## Development
+
+- When developing a new feature or checking on an issue, turning on debug mode (see above) may be helpful.
+
+- To see what scan codes reach the host, use `xev` on Linux systems.
+
+- Uploading the code to an *Arduino Pro Micro* can be tricky. Sometimes, you just have to try several times. On a Linux system, I noticed that things improve somewhat if you explicitly exclude your *Arduino* board in `udev`: Find out the vendor IDs of the board with `lsusb`. The *Pro Micro* has two - one when in normal mode, and a different one when in upload mode. When you have the IDs, create `/etc/udev/rules.d/77-arduino.rules` with the following contents:
+```
+ATTRS{idVendor}=="2341", ENV{ID_MM_DEVICE_IGNORE}="1"
+ATTRS{idVendor}=="1b4f", ENV{ID_MM_DEVICE_IGNORE}="1"
+```
+
+    Replace the vendor IDs with the ones from your board. Then, run `sudo udevadm trigger`.
+
+
 ## Contributing
 
 If you find any bugs or have ideas for new features, I'd be happy to receive your issues or pull requests. Also, currently I only have the German version of the keyboard, so I can only test with that one. Feedback about whether everything works with other layouts as intended would be very welcome.
+
 
 
 ## Resources
