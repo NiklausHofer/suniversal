@@ -55,10 +55,11 @@ There are a few settings you can make in `suniversal.h`, the more interesting on
 - To see what scan codes reach the host, use `xev` on Linux systems.
 
 - Uploading the code to an *Arduino Pro Micro* can be tricky. Sometimes, you just have to try several times. On a Linux system, I noticed that things improve somewhat if you explicitly exclude your *Arduino* board in `udev`: Find out the vendor IDs of the board with `lsusb`. The *Pro Micro* has two - one when in normal mode, and a different one when in upload mode. When you have the IDs, create `/etc/udev/rules.d/77-arduino.rules` with the following contents:
-```
-ATTRS{idVendor}=="2341", ENV{ID_MM_DEVICE_IGNORE}="1"
-ATTRS{idVendor}=="1b4f", ENV{ID_MM_DEVICE_IGNORE}="1"
-```
+
+    ```
+    ATTRS{idVendor}=="2341", ENV{ID_MM_DEVICE_IGNORE}="1"
+    ATTRS{idVendor}=="1b4f", ENV{ID_MM_DEVICE_IGNORE}="1"
+    ```
 
     Replace the vendor IDs with the ones from your board. Then, run `sudo udevadm trigger`.
 
