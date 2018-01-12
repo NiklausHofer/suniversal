@@ -16,6 +16,7 @@
 
 #### Coming Soon
 - mouse support - most of this is already implemented, only I don't have an actual *SUN* mouse to test...
+- support for boot protocol (see *Gotchas*)
 
 
 ## Background
@@ -87,6 +88,8 @@ There are a few settings you can make in `suniversal.h`, the more interesting on
 - The Compose key should by default invoke context menus, and the LED will not light up. If you're assigning this key on the host to invoke actual compose mode, have a look at the `COMPOSE_MODE` setting to get the LED working.
 
 - The keyboard cannot receive commands from the host, since the *Arduino* HID library currently does not support that. However, that should only mean that if the host wants to change the state of the keyboard LEDs, then that won't be reflected. For example, when you're using a second keyboard and press *Caps Lock* on it, the *Caps Lock* LED on the SUN keyboard won't light up. But why would you use another keyboard when you have your Type 5 right in front of you... ;-)
+
+- Boot protocol is currently not supported, i.e. depending on your machine and its BIOS, you may not be able to use the keyboard during boot. For example, it works on my main machine with UEFI BIOS, but not on an *HP* notebook.
 
 
 ## Development
