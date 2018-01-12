@@ -21,7 +21,7 @@
 #ifndef SUN_TO_USB_h
 #define SUN_TO_USB_h
 
-#include "suniversal.h"
+#include "config.h"
 #include "usb_codes.h"
 #include "macros.h"
 

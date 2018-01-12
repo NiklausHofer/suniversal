@@ -21,12 +21,10 @@
     along with suniversal. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "suniversal.h"
-#include "converter.h"
+#include "config.h"
+#include "keyboard.h"
 #include "sun_to_usb.h"
 #include "macros.h"
-
-#define array_len( x )  ( sizeof( x ) / sizeof( *x ) )
 
 #if defined(_USING_HID)
 
@@ -34,7 +32,9 @@ static const uint8_t hidReportDescriptor[] PROGMEM = {
     0x05, 0x01, // USAGE_PAGE (Generic Desktop)  // 47
     0x09, 0x06, // USAGE (Keyboard)
     0xa1, 0x01, // COLLECTION (Application)
+
     0x85, 0x02, //   REPORT_ID (2)
+
     0x05, 0x07, //   USAGE_PAGE (Keyboard)
 
     0x19, 0xe0, //   USAGE_MINIMUM (Keyboard LeftControl)
@@ -48,6 +48,18 @@ static const uint8_t hidReportDescriptor[] PROGMEM = {
     0x95, 0x01, //   REPORT_COUNT (1)
     0x75, 0x08, //   REPORT_SIZE (8)
     0x81, 0x03, //   INPUT (Cnt, Var, Abs)
+
+    // new, for LEDs
+    0x95, 0x05,  //   Report Count (5),
+    0x75, 0x01,  //   Report Size (1),
+    0x05, 0x08,  //   Usage Page (Page# for LEDs),
+    0x19, 0x01,  //   Usage Minimum (1),
+    0x29, 0x05,  //   Usage Maximum (5),
+    0x91, 0x02,  //   Output (Data, Variable, Absolute); LED report
+    0x95, 0x01,  //   Report Count (1),
+    0x75, 0x03,  //   Report Size (3),
+    0x91, 0x01,  //   Output (Constant), LED report padding
+    //
 
     0x95, 0x06, //   REPORT_COUNT (6)
     0x75, 0x08, //   REPORT_SIZE (8)
@@ -182,12 +194,12 @@ KeyReport::send() {
 //
 // CONVERTER
 //
-Converter::Converter() {
+KeyboardConverter::KeyboardConverter() {
     static HIDSubDescriptor node(hidReportDescriptor, sizeof(hidReportDescriptor));
     HID().AppendDescriptor(&node);
 }
 
-Converter::setLayout(uint8_t layout) {
+KeyboardConverter::setLayout(uint8_t layout) {
     macros.adjustToLayout(layout);
 }
 
@@ -200,9 +212,9 @@ Converter::setLayout(uint8_t layout) {
     report. This tells the OS the key is no longer pressed and that it shouldn't
     be repeated any more.
  */
-Converter::handleKey(uint8_t sunKey, bool pressed) {
+KeyboardConverter::handleKey(uint8_t sunKey, bool pressed) {
     uint16_t usbKey = sun2usb[sunKey];
-    DPRINTLN("Converter.handleKey: " +
+    DPRINTLN("KeyboardConverter.handleKey: " +
         String(sunKey, HEX) + " --> " + String(usbKey, HEX));
     if (usbKey > 0) {
         if (USE_MACROS && handleMacro(usbKey, pressed)) {
@@ -219,9 +231,9 @@ Converter::handleKey(uint8_t sunKey, bool pressed) {
 /*
 
  */
-bool Converter::handleMacro(uint16_t k, bool pressed) {
+bool KeyboardConverter::handleMacro(uint16_t k, bool pressed) {
 
-    DPRINT("Converter.handleMacro: " +
+    DPRINT("KeyboardConverter.handleMacro: " +
         String(k, HEX) + ", " + String(pressed));
     if ((k & 0xFF00) != 0xFF00) {
         DPRINTLN(" --> not a macro");
@@ -244,11 +256,11 @@ bool Converter::handleMacro(uint16_t k, bool pressed) {
 /*
     Clear report and send it.
  */
-Converter::releaseAll() {
+KeyboardConverter::releaseAll() {
     keyReport.releaseAll();
     keyReport.send();
 }
 
-Converter converter;
+KeyboardConverter keyboardConverter;
 
 #endif

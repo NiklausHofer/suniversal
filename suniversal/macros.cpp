@@ -18,7 +18,7 @@
     along with suniversal. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "suniversal.h"
+#include "config.h"
 #include "macros.h"
 
 // individual macros

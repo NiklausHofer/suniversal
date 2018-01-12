@@ -26,7 +26,7 @@ A couple of years back, I bought a *SUN Type 5c* keyboard at the *VCFe* flea mar
 
 ## Hardware
 
-I finally settled for the *Arduino Pro Micro*. The *Micro* may also work, but I haven't tested that. Whichever board you choose, make sure it's 5V, since the RS232 signals from the keyboard are 5V TTL levels! Shortly after starting this project, I also got my hands on a *Type 5* in addition to the *Type 5c* I already had. For both, I decided to put the *Arduino* into the keyboard case (had to open it for cleaning anyway). The hardware is different for both, so here's how I went about it.
+I finally settled for the *Arduino Pro Micro*. The *Micro* may also work, but I haven't tested that. Whichever board you choose, make sure it's 5V, since the RS232 signals from the keyboard are 5V TTL levels! Shortly after starting this project, I also got my hands on a *Type 5* in addition to the *Type 5c* I already had. For both, I decided to put the *Arduino* into the keyboard case (had to open them for cleaning anyway). The hardware is different for both, so here's how I went about it.
 
 ### *Type 5c*
 The original cable can be unplugged from the keyboard's PCB, so it's easy to revert the modification should I ever desire to do so. The only thing to fabricate was a very simple harness to connect the *Arduino* with the PCB:
@@ -35,12 +35,13 @@ The original cable can be unplugged from the keyboard's PCB, so it's easy to rev
 |---------|-------------|------------|---------------------|
 |     1   |    black    |   GND      |      GND            |
 |     2   |    red      |   +5V      |      Vcc            |
+|     3?  |    ?        |  serial RX (from mouse)    | RX  |
 |     4   |    brown    |  serial TX (to keyboard)   | D9  |
 |     5   |    blue     |  serial RX (from keyboard) | D10 |
 
 *as found on a *Type 5c* keyboard, may differ depending on model & year
 
-The most challenging part may be finding the right plug to connect to the PCB. I fabricated something out of a connector that had the right pitch:
+If you're not planning on using the mouse, you can skip that wire. The most challenging part may be finding the right plug to connect to the PCB. I fabricated something out of a connector that had the right pitch:
 
 ![connector](doc/connector.jpg)
 
@@ -60,7 +61,7 @@ And here the mapping to the *Arduino* pins:
 |     1    | GND      |      GND             |
 |     2    | GND      |                      |
 |     3    | +5V      |      Vcc             |
-|     4    | serial RX (from mouse)    |     |
+|     4    | serial RX (from mouse)    | RX  |
 |     5    | serial TX (to keyboard)   | D9  |
 |     6    | serial RX (from keyboard) | D10 |
 |     7    | ?        |                      |
@@ -72,11 +73,13 @@ And here the mapping to the *Arduino* pins:
 Analyzing *SunType5_ArduinoAdapter*, I realized that the limitations were rooted in the use of the *Arduino* Keyboard library for the conversion to USB. Not that the library itself is in any way limited, it's just that it is designed for a different use case - turning `Print`ed characters into key strokes. But what we need here is actually much simpler - just a plain scan code converter. So I merged *SunType5_ArduinoAdapter* and the Keyboard library and started refactoring and extending the code. The result is this project.
 
 #### Configuration
-There are a few settings you can make in `suniversal.h`, the more interesting ones being:
+There are a few settings you can make in `config.h`, the more interesting ones being:
 
 - `USE_MACROS` - When enabled, this assigns *macros* (short key stroke sequences) instead of the single USB key codes, to the special keys in the fun cluster (the eleven keys on the left). This is because mostly, those don't seem to have any effect unless you make according settings in the OS. So instead of sending e.g. the USB_COPY code, USB_CONTROL followed by USB_C will be sent. To add your own macros, have a look at `macros.cpp`. Macros are enabled by default.
 
 - `NUM_LOCK_ON` - This determines whether NumLock will be on or off after power on. Defaults to on.
+
+- `USE_MOUSE` - When enabled, the signals from a *SUN* mouse plugged into the keyboard will be forwarded to USB. (To be on the safe side, don't hot-plug the mouse.) **Note: This doesn't work yet!**
 
 - `DEBUG` - You can enable debug mode with this, which will put diagnostic messages on the serial port. Additionally, the power key will turn into a reset button for the keyboard, so it's easier to observe start up messages. This is off by default.
 

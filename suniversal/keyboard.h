@@ -21,8 +21,8 @@
     along with suniversal. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CONVERTER_h
-#define CONVERTER_h
+#ifndef KEYBOARD_CONVERTER_h
+#define KEYBOARD_CONVERTER_h
 
 #include <HID.h>
 
@@ -60,20 +60,20 @@ public:
 /*
     the scan code converter
  */
-class Converter {
+class KeyboardConverter {
 
 private:
     KeyReport keyReport;
     bool handleMacro(uint16_t k, bool pressed);
 
 public:
-    Converter();
+    KeyboardConverter();
     setLayout(uint8_t layout);
     handleKey(uint8_t k, bool pressed);
     releaseAll();
 };
 
-extern Converter converter;
+extern KeyboardConverter keyboardConverter;
 
 #endif
 #endif

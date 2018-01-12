@@ -8,6 +8,11 @@
 #define DEBUG false
 
 
+// Set whether to use the mouse (if one is plugged into the keyboard).
+// NOT YET WORKING!
+#define USE_MOUSE false
+
+
 // Set whether to use macros instead of single codes for the special keys in the
 // fun cluster.
 //
@@ -74,5 +79,13 @@
 #define DPRINTLN(...)
 
 #endif
+
+
+// --- other helpers ---------------------------------------------------------
+
+#define array_len( x )  ( sizeof( x ) / sizeof( *x ) )
+
+
+// ---------------------------------------------------------------------------
 
 #endif

@@ -25,8 +25,9 @@
 
 #include <SoftwareSerial.h>
 
-#include "suniversal.h"
-#include "converter.h"
+#include "config.h"
+#include "keyboard.h"
+#include "mouse.h"
 
 // Arduino pins
 #define PIN_RX 10
@@ -79,7 +80,15 @@ uint8_t count_to_compose_off = 0;
 void setup() {
 
     if (DEBUG) {
-        Serial.begin(1200);
+        Serial.begin(1200, SERIAL_8N1);
+    }
+
+    if (USE_MOUSE) {
+        // mouse gets hooked to the H/W serial,
+        // which on the Pro Micro is Serial1
+        //
+        // TODO: not yet working, so ignore
+        //Serial1.begin(1200, SERIAL_8N1);
     }
 
     sun.begin(1200);
@@ -115,7 +124,7 @@ void resetKeyboard() {
         clearFromBuffer(2);
 
         if (USE_MACROS) {
-            converter.setLayout(getLayout());
+            keyboardConverter.setLayout(getLayout());
         }
 
         sun.write(cmdLED, 2); // reset LEDs
@@ -150,7 +159,7 @@ void resetKeyboard() {
     cases, it will be the same as is set in the keyboard itself. So we get the
     layout from the keyboard here and pass it to the converter to make the
     necessary adjustments (see resetKeyboard). If this is not not desired, you
-    can force a particular layout with the FORCE_LAYOUT setting in suniversal.h.
+    can force a particular layout with the FORCE_LAYOUT setting in config.h.
  */
 uint8_t getLayout() {
 
@@ -166,9 +175,10 @@ uint8_t getLayout() {
         return UNITED_STATES;
     }
 
-    // On the Type 5c I have, there are only 5 DIP switches, corresponding to
-    // bits 4 through 8 of the layout code. Bit 3 is always 1, and bits 2 and
-    // 1 are 0 per documentation anyway. Therefore masking out bits 1,2 and 3.
+    // The Type 5 has 8 DIP switch, while on the Type 5c I have, there are only
+    // 5, corresponding to bits 4 through 8 of the layout code. Bit 3 is always
+    // 1, and bits 2 and 1 are 0 per documentation anyway. Therefore masking out
+    // bits 1,2 and 3. Works with both keyboards.
     uint8_t l = waitAndRead() & 0x1F;
 
     switch (l) {
@@ -192,6 +202,17 @@ uint8_t getLayout() {
 
     DPRINTLN("invalid keyboard layout: " + String(l) + ", defaulting to US");
     return UNITED_STATES;
+}
+
+/*
+    On the Pro Micro, and a few other boards, we need to use serialEventRun
+    instead of serialEvent. See for example:
+        http://forum.arduino.cc/index.php?topic=135011.0
+ */
+void serialEventRun() {
+    while (Serial1.available()) {
+        mouseConverter.update(Serial1.read());
+    }
 }
 
 void loop() {
@@ -253,13 +274,13 @@ void loop() {
 void handleKey(uint8_t key) {
     if (key == KBD_IDLE) {
         DPRINTLN("suniversal: all released");
-        converter.releaseAll();
+        keyboardConverter.releaseAll();
     } else {
         bool pressed = (key & BREAK_BIT) == 0;
         key &= (~BREAK_BIT); // mask out break bit
         DPRINT("suniversal: " + String(key, HEX));
         DPRINTLN(pressed ? " down" : " up");
-        converter.handleKey(key, pressed);
+        keyboardConverter.handleKey(key, pressed);
     }
     DPRINTLN();
 }
