@@ -19,11 +19,6 @@
 #define USE_MACROS true
 
 
-// Set whether NumLock should be on after start up.
-//
-#define NUM_LOCK_ON true
-
-
 // When compose mode is true, the LED will turn on when the key is pressed, and
 // go off after the next two key strokes, or when Compose is pressed again. This
 // is meant for when you assign the key to actual compose on the host. When

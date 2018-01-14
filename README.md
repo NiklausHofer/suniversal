@@ -4,7 +4,12 @@
 
 ## TL;DR
 
-*suniversal* is a USB adapter for *SUN Type 5* keyboards. All keys are working. It is developed on an *Arduino Pro Micro*, but other boards based on the *ATmega32U4* micro-controller should work as well.
+*suniversal* is a USB adapter for *SUN Type 5* keyboards. It is developed on an *Arduino Pro Micro*, but other boards based on the *ATmega32U4* micro-controller should work as well.
+
+#### Features
+- all keys working
+- boot protocol supported, i.e. works in BIOS
+- keyboard LEDs controlled by host
 
 #### Compatibility
 | keyboard | status                                   |
@@ -16,7 +21,6 @@
 
 #### Coming Soon
 - mouse support - most of this is already implemented, only I don't have an actual *SUN* mouse to test...
-- support for boot protocol (see *Gotchas*)
 
 
 ## Background
@@ -29,6 +33,7 @@ A couple of years back, I bought a *SUN Type 5c* keyboard at the *VCFe* flea mar
 I finally settled for the *Arduino Pro Micro*. The *Micro* may also work, but I haven't tested that. Whichever board you choose, make sure it's 5V, since the RS232 signals from the keyboard are 5V TTL levels! Shortly after starting this project, I also got my hands on a *Type 5* in addition to the *Type 5c* I already had. For both, I decided to put the *Arduino* into the keyboard case (had to open them for cleaning anyway). The hardware is different for both, so here's how I went about it.
 
 ### *Type 5c*
+
 The original cable can be unplugged from the keyboard's PCB, so it's easy to revert the modification should I ever desire to do so. The only thing to fabricate was a very simple harness to connect the *Arduino* with the PCB:
 
 | PCB pin | wire color* | function   | *Arduino* pin       |
@@ -46,6 +51,7 @@ If you're not planning on using the mouse, you can skip that wire. The most chal
 ![connector](doc/connector.jpg)
 
 ### *Type 5*
+
 Here, the keyboard cable is not fixed, but plugged into one of the external connectors on either side of the keyboard. There's no internal connector on the keyboard's PCB to which we could conveniently connect the *Arduino*. I therefore soldered the wires form the *Arduino* to one of the external connectors (I chose the left one), and stowed it away between the keyboard backplate and the PCB, wrapped into the little anti-static bag it came in for insulation.
 
 ![soldering](doc/pcb.jpg)
@@ -70,18 +76,29 @@ And here the mapping to the *Arduino* pins:
 
 ## Software
 
-Analyzing *SunType5_ArduinoAdapter*, I realized that the limitations were rooted in the use of the *Arduino* Keyboard library for the conversion to USB. Not that the library itself is in any way limited, it's just that it is designed for a different use case - turning `Print`ed characters into key strokes. But what we need here is actually much simpler - just a plain scan code converter. So I merged *SunType5_ArduinoAdapter* and the Keyboard library and started refactoring and extending the code. The result is this project.
+Analyzing *SunType5_ArduinoAdapter*, I realized that the limitations were rooted in the use of the *Arduino* Keyboard library for the conversion to USB. It's designed for a different use case - turning `Print`ed characters into key strokes. But what we need here is actually much simpler - just a plain scan code converter. So I merged *SunType5_ArduinoAdapter* and the Keyboard library and started refactoring and extending the code. Later on I switched from the *Arduino* core USB HID library to [NicoHood's HID project](https://github.com/NicoHood/HID) for the USB heavy lifting. This enabled support for boot protocol and control of the keyboard LEDs by the host.
 
 #### Configuration
+
 There are a few settings you can make in `config.h`, the more interesting ones being:
 
 - `USE_MACROS` - When enabled, this assigns *macros* (short key stroke sequences) instead of the single USB key codes, to the special keys in the fun cluster (the eleven keys on the left). This is because mostly, those don't seem to have any effect unless you make according settings in the OS. So instead of sending e.g. the USB_COPY code, USB_CONTROL followed by USB_C will be sent. To add your own macros, have a look at `macros.cpp`. Macros are enabled by default.
 
-- `NUM_LOCK_ON` - This determines whether NumLock will be on or off after power on. Defaults to on.
-
 - `USE_MOUSE` - When enabled, the signals from a *SUN* mouse plugged into the keyboard will be forwarded to USB. (To be on the safe side, don't hot-plug the mouse.) **Note: This doesn't work yet!**
 
 - `DEBUG` - You can enable debug mode with this, which will put diagnostic messages on the serial port. Additionally, the power key will turn into a reset button for the keyboard, so it's easier to observe start up messages. This is off by default.
+
+#### Building
+
+*NicoHood*'s HID library is included as a *Git* submodule, so after cloning this repo, make sure you get the submodule:
+
+```bash
+git clone https://github.com/xelalexv/suniversal.git
+cd suniversal
+git submodule update --init
+```
+
+I'm currently using the *Arduino* IDE (version 1.8.5) for building and uploading *suniversal*. In the IDE you need to set the *Sketchbook location* preference to the *suniversal* project root, otherwise the HID library will not be picked up. After that, *Verify* and *Upload* should work.
 
 
 ## Gotchas
@@ -89,10 +106,6 @@ There are a few settings you can make in `config.h`, the more interesting ones b
 - Code translations were set to the same USB scan codes that a *SUN Type 7* keyboard sends (the *Type 7* is USB native). However, whether special keys such as the audio and power keys have the desired result depends on your OS. You may have to configure it accordingly. On my *Ubuntu* box for example, I configured keyboard shortcuts for the audio and power keys in the keyboard settings. The keys in the fun cluster (*Stop*, *Again*, *Undo* etc.) have macros assigned by default, so they should work without making any settings, unless you turn macros off.
 
 - The Compose key should by default invoke context menus, and the LED will not light up. If you're assigning this key on the host to invoke actual compose mode, have a look at the `COMPOSE_MODE` setting to get the LED working.
-
-- The keyboard cannot receive commands from the host, since the *Arduino* HID library currently does not support that. However, that should only mean that if the host wants to change the state of the keyboard LEDs, then that won't be reflected. For example, when you're using a second keyboard and press *Caps Lock* on it, the *Caps Lock* LED on the SUN keyboard won't light up. But why would you use another keyboard when you have your Type 5 right in front of you... ;-)
-
-- Boot protocol is currently not supported, i.e. depending on your machine and its BIOS, you may not be able to use the keyboard during boot. For example, it works on my main machine with UEFI BIOS, but not on an *HP* notebook.
 
 
 ## Development

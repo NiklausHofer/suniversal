@@ -21,14 +21,6 @@
 #ifndef MOUSE_CONVERTE_h
 #define MOUSE_CONVERTER_h
 
-#include <HID.h>
-
-#if !defined(_USING_HID)
-
-#warning "using legacy HID core (non pluggable)"
-
-#else
-
 #include <stdint.h>
 
 class MouseConverter {
@@ -48,5 +40,4 @@ public:
 
 extern MouseConverter mouseConverter;
 
-#endif
 #endif

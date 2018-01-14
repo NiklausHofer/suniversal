@@ -18,12 +18,11 @@
     along with suniversal. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <Mouse.h>
+#include <Arduino.h>
+#include "HID-Project.h"
 
 #include "config.h"
 #include "mouse.h"
-
-#if defined(_USING_HID)
 
 /*
 	collected from Linux mouse man page:
@@ -93,5 +92,3 @@ MouseConverter::handleButton(uint8_t states, uint8_t buttonMask, char buttonId) 
 }
 
 MouseConverter mouseConverter;
-
-#endif

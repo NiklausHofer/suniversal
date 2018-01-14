@@ -1,5 +1,5 @@
 /*
-    scan code converter
+    keyboard scan code converter
     Copyright (c) 2017, Alexander Vollschwitz
 
     based on Arduino Keyboard library, Copyright (c) 2015, Arduino LLC
@@ -24,16 +24,24 @@
 #ifndef KEYBOARD_CONVERTER_h
 #define KEYBOARD_CONVERTER_h
 
-#include <HID.h>
-
-#if !defined(_USING_HID)
-
-#warning "using legacy HID core (non pluggable)"
-
-#else
+#include <Arduino.h>
+#include "HID-Project.h"
 
 /*
-    low level key report: up to 6 keys and modifiers at once
+    We use BootKeyboard from NicoHood HID project to do the USB heavy
+    lifting. Everything keyboard-related however remains in suniversal.
+ */
+class USBAdapter : public BootKeyboard_ {
+
+public:
+    USBAdapter();
+    int send(const void* data, int len);
+};
+
+extern USBAdapter usbAdapter;
+
+/*
+    key report data, up to 6 keys and modifiers at once
  */
 typedef struct ReportData {
     uint8_t modifiers;
@@ -41,6 +49,9 @@ typedef struct ReportData {
     uint8_t keys[6];
 };
 
+/*
+    handles keys & modifiers
+ */
 class KeyReport {
 
 private:
@@ -55,7 +66,6 @@ public:
     releaseAll();
     send();
 };
-
 
 /*
     the scan code converter
@@ -75,5 +85,4 @@ public:
 
 extern KeyboardConverter keyboardConverter;
 
-#endif
 #endif

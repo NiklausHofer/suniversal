@@ -1,5 +1,5 @@
 /*
-    scan code converter
+    keyboard scan code converter
     Copyright (c) 2017, Alexander Vollschwitz
 
     based on Arduino Keyboard library, Copyright (c) 2015, Arduino LLC
@@ -26,57 +26,27 @@
 #include "sun_to_usb.h"
 #include "macros.h"
 
-#if defined(_USING_HID)
-
-static const uint8_t hidReportDescriptor[] PROGMEM = {
-    0x05, 0x01, // USAGE_PAGE (Generic Desktop)  // 47
-    0x09, 0x06, // USAGE (Keyboard)
-    0xa1, 0x01, // COLLECTION (Application)
-
-    0x85, 0x02, //   REPORT_ID (2)
-
-    0x05, 0x07, //   USAGE_PAGE (Keyboard)
-
-    0x19, 0xe0, //   USAGE_MINIMUM (Keyboard LeftControl)
-    0x29, 0xe7, //   USAGE_MAXIMUM (Keyboard Right GUI)
-    0x15, 0x00, //   LOGICAL_MINIMUM (0)
-    0x25, 0x01, //   LOGICAL_MAXIMUM (1)
-    0x75, 0x01, //   REPORT_SIZE (1)
-
-    0x95, 0x08, //   REPORT_COUNT (8)
-    0x81, 0x02, //   INPUT (Data,Var,Abs)
-    0x95, 0x01, //   REPORT_COUNT (1)
-    0x75, 0x08, //   REPORT_SIZE (8)
-    0x81, 0x03, //   INPUT (Cnt, Var, Abs)
-
-    // new, for LEDs
-    0x95, 0x05,  //   Report Count (5),
-    0x75, 0x01,  //   Report Size (1),
-    0x05, 0x08,  //   Usage Page (Page# for LEDs),
-    0x19, 0x01,  //   Usage Minimum (1),
-    0x29, 0x05,  //   Usage Maximum (5),
-    0x91, 0x02,  //   Output (Data, Variable, Absolute); LED report
-    0x95, 0x01,  //   Report Count (1),
-    0x75, 0x03,  //   Report Size (3),
-    0x91, 0x01,  //   Output (Constant), LED report padding
-    //
-
-    0x95, 0x06, //   REPORT_COUNT (6)
-    0x75, 0x08, //   REPORT_SIZE (8)
-    0x15, 0x00, //   LOGICAL_MINIMUM (0)
-    0x25, 0x81, //   LOGICAL_MAXIMUM (101)
-    0x05, 0x07, //   USAGE_PAGE (Keyboard)
-
-    0x19, 0x00, //   USAGE_MINIMUM (Reserved (no event indicated))
-    0x29, 0x81, //   USAGE_MAXIMUM (Keyboard Application)
-    0x81, 0x00, //   INPUT (Data, Ary, Abs)
-    0xc0,       // END_COLLECTION
-};
-
 MacroTable macros;
 
 /*
-    KEY REPORT
+    USB adapter
+ */
+USBAdapter::USBAdapter() {
+    BootKeyboard.begin();
+}
+
+/*
+    We maintain our own keyboard logic, since BootKeyboard does not really
+    fit our use case. We therefore need to send our own key report data.
+ */
+int USBAdapter::send(const void* data, int len) {
+    return USB_Send(pluggedEndpoint | TRANSFER_RELEASE, data, len);
+}
+
+USBAdapter usbAdapter;
+
+/*
+    key report
  */
 KeyReport::KeyReport() {
     releaseAll();
@@ -180,7 +150,7 @@ KeyReport::releaseAll() {
 }
 
 KeyReport::send() {
-    HID().SendReport(2, &data, sizeof(ReportData));
+    usbAdapter.send(&data, sizeof(ReportData));
     DPRINT("KeyReport.send: modifiers=" +
         String(data.modifiers, HEX) + ", keys=[");
     if (DEBUG) {
@@ -191,13 +161,10 @@ KeyReport::send() {
     DPRINTLN(" ]");
 }
 
-//
-// CONVERTER
-//
-KeyboardConverter::KeyboardConverter() {
-    static HIDSubDescriptor node(hidReportDescriptor, sizeof(hidReportDescriptor));
-    HID().AppendDescriptor(&node);
-}
+/*
+    converter
+ */
+KeyboardConverter::KeyboardConverter() {}
 
 KeyboardConverter::setLayout(uint8_t layout) {
     macros.adjustToLayout(layout);
@@ -262,5 +229,3 @@ KeyboardConverter::releaseAll() {
 }
 
 KeyboardConverter keyboardConverter;
-
-#endif

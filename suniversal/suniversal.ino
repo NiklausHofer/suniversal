@@ -93,11 +93,6 @@ void setup() {
 
     sun.begin(1200);
     resetKeyboard();
-
-    if (NUM_LOCK_ON) {
-        toggleLEDs(NUM_LOCK_MASK);
-        handleKey(NUM_LOCK);
-    }
 }
 
 /*
@@ -222,6 +217,8 @@ void loop() {
         return;
     }
 
+    updateLEDs();
+
     while (sun.available() > 0) {
 
         int key = sun.read();
@@ -232,16 +229,9 @@ void loop() {
                     // in debug mode, power key resets keyboard
                     resetKeyboard();
                     return;
+                } else {
+                    usbAdapter.wakeupHost();
                 }
-                break;
-            case CAPS_LOCK:
-                toggleLEDs(CAPS_LOCK_MASK);
-                break;
-            case SCROLL_LOCK:
-                toggleLEDs(SCROLL_LOCK_MASK);
-                break;
-            case NUM_LOCK:
-                toggleLEDs(NUM_LOCK_MASK);
                 break;
             case COMPOSE:
                 if (COMPOSE_MODE) {
@@ -283,6 +273,18 @@ void handleKey(uint8_t key) {
         keyboardConverter.handleKey(key, pressed);
     }
     DPRINTLN();
+}
+
+void updateLEDs() {
+    uint8_t leds = usbAdapter.getLeds();
+    leds = ((leds & LED_CAPS_LOCK) << 2) | ((leds & LED_COMPOSE) >> 2) |
+        (leds & (LED_NUM_LOCK | LED_SCROLL_LOCK));
+    if (cmdLED[1] != leds) {
+        DPRINTLN("suniversal: LED state changed: " + String(cmdLED[1], HEX) +
+            " --> " + String(leds, HEX));
+        cmdLED[1] = leds;
+        sun.write(cmdLED, 2);
+    }
 }
 
 void toggleLEDs(byte mask) {
