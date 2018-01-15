@@ -40,7 +40,7 @@ The original cable can be unplugged from the keyboard's PCB, so it's easy to rev
 |---------|-------------|------------|---------------------|
 |     1   |    black    |   GND      |      GND            |
 |     2   |    red      |   +5V      |      Vcc            |
-|     3?  |    ?        |  serial RX (from mouse)    | RX  |
+|     3   |    green    |  serial RX (from mouse)    | RX  |
 |     4   |    brown    |  serial TX (to keyboard)   | D9  |
 |     5   |    blue     |  serial RX (from keyboard) | D10 |
 
