@@ -24,30 +24,7 @@
 #ifndef KEYBOARD_CONVERTER_h
 #define KEYBOARD_CONVERTER_h
 
-#include <Arduino.h>
-#include "HID-Project.h"
-
-/*
-    We use BootKeyboard from NicoHood HID project to do the USB heavy
-    lifting. Everything keyboard-related however remains in suniversal.
- */
-class USBAdapter : public BootKeyboard_ {
-
-public:
-    USBAdapter();
-    int send(const void* data, int len);
-};
-
-extern USBAdapter usbAdapter;
-
-/*
-    key report data, up to 6 keys and modifiers at once
- */
-typedef struct ReportData {
-    uint8_t modifiers;
-    uint8_t reserved;
-    uint8_t keys[6];
-};
+#include "usb_adapter.h"
 
 /*
     handles keys & modifiers

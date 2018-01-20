@@ -277,8 +277,9 @@ void handleKey(uint8_t key) {
 
 void updateLEDs() {
     uint8_t leds = usbAdapter.getLeds();
-    leds = ((leds & LED_CAPS_LOCK) << 2) | ((leds & LED_COMPOSE) >> 2) |
-        (leds & (LED_NUM_LOCK | LED_SCROLL_LOCK));
+    leds = ((leds & USB_LED_CAPS_LOCK) << 2) |
+           ((leds & USB_LED_COMPOSE) >> 2) |
+            (leds & (USB_LED_NUM_LOCK | USB_LED_SCROLL_LOCK));
     if (cmdLED[1] != leds) {
         DPRINTLN("suniversal: LED state changed: " + String(cmdLED[1], HEX) +
             " --> " + String(leds, HEX));

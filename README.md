@@ -4,7 +4,7 @@
 
 ## TL;DR
 
-*suniversal* is a USB adapter for *SUN Type 5* keyboards. It is developed on an *Arduino Pro Micro*, but other boards based on the *ATmega32U4* micro-controller should work as well.
+*suniversal* is a USB adapter for *SUN Type 5* keyboards. It is developed on an *Arduino Pro Micro*, but other boards based on the *ATmega32u4* micro-controller should work as well.
 
 #### Features
 - all keys working
@@ -76,7 +76,7 @@ And here the mapping to the *Arduino* pins:
 
 ## Software
 
-Analyzing *SunType5_ArduinoAdapter*, I realized that the limitations were rooted in the use of the *Arduino* Keyboard library for the conversion to USB. It's designed for a different use case - turning `Print`ed characters into key strokes. But what we need here is actually much simpler - just a plain scan code converter. So I merged *SunType5_ArduinoAdapter* and the Keyboard library and started refactoring and extending the code. Later on I switched from the *Arduino* core USB HID library to [NicoHood's HID project](https://github.com/NicoHood/HID) for the USB heavy lifting. This enabled support for boot protocol and control of the keyboard LEDs by the host.
+Analyzing *SunType5_ArduinoAdapter*, I realized that the limitations were rooted in the use of the *Arduino* Keyboard library for the conversion to USB. It's designed for a different use case - turning `Print`ed characters into key strokes. But what we need here is actually much simpler - just a plain scan code converter. So I merged *SunType5_ArduinoAdapter* and the Keyboard library and started refactoring and extending the code. Later on I switched from the *Arduino* core USB HID library to [NicoHood's HID project](https://github.com/NicoHood/HID) for the USB heavy lifting. This enabled support for boot protocol and control of the keyboard LEDs by the host. I then went on to extract the USB part from that library (it was really just one class that was actually needed), to keep dependencies down.
 
 #### Configuration
 
@@ -88,24 +88,14 @@ There are a few settings you can make in `config.h`, the more interesting ones b
 
 - `DEBUG` - You can enable debug mode with this, which will put diagnostic messages on the serial port. Additionally, the power key will turn into a reset button for the keyboard, so it's easier to observe start up messages. This is off by default.
 
-#### Building
-
-*NicoHood*'s HID library is included as a *Git* submodule, so after cloning this repo, make sure you get the submodule:
-
-```bash
-git clone https://github.com/xelalexv/suniversal.git
-cd suniversal
-git submodule update --init
-```
-
-I'm currently using the *Arduino* IDE (version 1.8.5) for building and uploading *suniversal*. In the IDE you need to set the *Sketchbook location* preference to the *suniversal* project root, otherwise the HID library will not be picked up. After that, *Verify* and *Upload* should work.
-
 
 ## Gotchas
 
 - Code translations were set to the same USB scan codes that a *SUN Type 7* keyboard sends (the *Type 7* is USB native). However, whether special keys such as the audio and power keys have the desired result depends on your OS. You may have to configure it accordingly. On my *Ubuntu* box for example, I configured keyboard shortcuts for the audio and power keys in the keyboard settings. The keys in the fun cluster (*Stop*, *Again*, *Undo* etc.) have macros assigned by default, so they should work without making any settings, unless you turn macros off.
 
 - The Compose key should by default invoke context menus, and the LED will not light up. If you're assigning this key on the host to invoke actual compose mode, have a look at the `COMPOSE_MODE` setting to get the LED working.
+
+- Boot protocol is supported, so you can use the keyboard when in BIOS or boot loader. Depending on the the particular host machine and its BIOS however, that may not fully work as expected. On one laptop for example, using the keyboard in *Grub* was very sluggish. Other than that, I haven't had any problems, but I only have a limited number of machines to test with. If you experience any trouble, plugging the keyboard in a different USB port may actually help.
 
 
 ## Development

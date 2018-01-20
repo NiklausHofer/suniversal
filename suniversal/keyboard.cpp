@@ -29,27 +29,12 @@
 MacroTable macros;
 
 /*
-    USB adapter
- */
-USBAdapter::USBAdapter() {
-    BootKeyboard.begin();
-}
-
-/*
-    We maintain our own keyboard logic, since BootKeyboard does not really
-    fit our use case. We therefore need to send our own key report data.
- */
-int USBAdapter::send(const void* data, int len) {
-    return USB_Send(pluggedEndpoint | TRANSFER_RELEASE, data, len);
-}
-
-USBAdapter usbAdapter;
-
-/*
     key report
  */
 KeyReport::KeyReport() {
+    usbAdapter.setReportData(&data);
     releaseAll();
+    send();
 }
 
 /*
@@ -149,8 +134,11 @@ KeyReport::releaseAll() {
     data.modifiers = 0;
 }
 
+/*
+
+ */
 KeyReport::send() {
-    usbAdapter.send(&data, sizeof(ReportData));
+    usbAdapter.send();
     DPRINT("KeyReport.send: modifiers=" +
         String(data.modifiers, HEX) + ", keys=[");
     if (DEBUG) {

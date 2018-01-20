@@ -19,7 +19,7 @@
 */
 
 #include <Arduino.h>
-#include "HID-Project.h"
+#include <Mouse.h>
 
 #include "config.h"
 #include "mouse.h"

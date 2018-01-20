@@ -1,3 +1,0 @@
-[submodule "libraries/HID"]
-	path = libraries/HID
-	url = https://github.com/NicoHood/HID.git
