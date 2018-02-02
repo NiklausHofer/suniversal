@@ -95,7 +95,7 @@ There are a few settings you can make in `config.h`, the more interesting ones b
 
 - The Compose key should by default invoke context menus, and the LED will not light up. If you're assigning this key on the host to invoke actual compose mode, have a look at the `COMPOSE_MODE` setting to get the LED working.
 
-- Boot protocol is supported, so you can use the keyboard when in BIOS or boot loader. Depending on the the particular host machine and its BIOS however, that may not fully work as expected. On one laptop for example, using the keyboard in *Grub* was very sluggish. Other than that, I haven't had any problems, but I only have a limited number of machines to test with. If you experience any trouble, plugging the keyboard in a different USB port may actually help.
+- Boot protocol is supported, so you can use the keyboard when in BIOS or boot loader. Depending on the particular host machine and its BIOS however, that may not fully work as expected. For example, on one laptop I'm using, the keyboard was very sluggish in *Grub*. What helped here was adding `GRUB_TERMINAL_INPUT="usb_keyboard at_keyboard console"` in `/etc/default/grub`, followed by `sudo update-grub`. A word of caution, though: When you mess around with the *Grub* config, have something like [Super Grub2 Disk](https://www.supergrubdisk.org/super-grub2-disk/) handy in case you break it and can't boot into your system any longer. I've been there... ;-)
 
 
 ## Development
