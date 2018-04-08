@@ -84,11 +84,12 @@ void setup() {
     }
 
     if (USE_MOUSE) {
-        // mouse gets hooked to the H/W serial,
-        // which on the Pro Micro is Serial1
-        //
-        // TODO: not yet working, so ignore
-        //Serial1.begin(1200, SERIAL_8N1);
+        // mouse gets hooked to the H/W serial, which on the Pro Micro is
+        // Serial1. IMPORTANT: Just like the keyboard, the mouse also uses
+        // inverted serial signal, so you need an inverter in the line between
+        // the mouse and RX of the Arduino, e.g. a transistor and two resistors
+        // (Tx->15kOhm->B, C->Rx, 5V->10kOhm->Rx, E->GND).
+        Serial1.begin(1200, SERIAL_8N2);
     }
 
     sun.begin(1200);

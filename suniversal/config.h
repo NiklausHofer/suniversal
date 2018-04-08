@@ -9,8 +9,8 @@
 
 
 // Set whether to use the mouse (if one is plugged into the keyboard).
-// NOT YET WORKING!
-#define USE_MOUSE false
+//
+#define USE_MOUSE true
 
 
 // Set whether to use macros instead of single codes for the special keys in the

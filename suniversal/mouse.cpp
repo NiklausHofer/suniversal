@@ -25,19 +25,27 @@
 #include "mouse.h"
 
 /*
-	collected from Linux mouse man page:
+    The mouse I tested this with is a model Compact 1, SUN no. 370-1586-03.
+    This one uses the 5-byte Mousesystems protocol, not the 3-byte SUN
+    protocol (collected from Linux mouse man page):
 
-    The Sun protocol uses 1 start bit, 8 data bits, no parity and two stop bits
-    at the speed of 1200 bits/sec. Data is sent to RxD in 3-byte packets. The
-    relative mouse movement is sent as dx (positive means right) and dy (positive
-    means down). dx is sent as the sum of the two two's-complement values, dy is
-    sent as negated sum of the two two's-complement values. lb (mb, rb) are
-    cleared when the left (middle, right) button is pressed:
+    The Mousesystems protocol uses 1 start bit, 8 data bits, no parity
+    and two stop bits at the speed of 1200 bits/sec. Data is sent to RxD
+    in 5-byte packets. The relative mouse movement is sent as dx (positive
+    means right) and dy (positive means down). dx is sent as the sum of
+    the two two's-complement values, dy is sent as negated sum of the two
+    two's-complement values. lb (mb, rb) are cleared when the left (middle,
+    right) button is pressed:
 
 	 byte  d7    d6     d5     d4     d3     d2     d1     d0
 	  1    1     0      0      0      0      lb     mb     rb
 	  2    0    dxa6   dxa5   dxa4   dxa3   dxa2   dxa1   dxa0
 	  3    0    dya6   dya5   dya4   dya3   dya2   dya1   dya0
+      4    0    dxb6   dxb5   dxb4   dxb3   dxb2   dxb1   dxb0
+      5    0    dyb6   dyb5   dyb4   dyb3   dyb2   dyb1   dyb0
+
+	http://www.rosenau-ka.de/ps2sun/
+
 */
 
 #define BUTTON_RIGHT_MASK  0x01
@@ -53,14 +61,22 @@ MouseConverter::MouseConverter() {
 
 MouseConverter::update(uint8_t data) {
 	// we need to sync on data frame start
-	if ((data & DATA_FRAME_START) != 0) {
+	if ((data & 0xf8) == DATA_FRAME_START) {
 		buffer[0] = data;
 		bufferIx = 1;
 	} else if (bufferIx > 0) {
 		buffer[bufferIx++] = data;
 		if (bufferIx == array_len(buffer)) {
+			DPRINT("MouseConverter.update: [");
+		    if (DEBUG) {
+		        for (uint8_t i = 0; i < array_len(buffer); i++) {
+		            DPRINT(" " + String(buffer[i], HEX));
+		        }
+		    }
+		    DPRINTLN(" ]");
 			handleButtons(buffer[0]);
 			handleMove(buffer[1], buffer[2]);
+			handleMove(buffer[3], buffer[4]);
 			bufferIx = 0;
 		}
 	}
@@ -68,12 +84,17 @@ MouseConverter::update(uint8_t data) {
 
 MouseConverter::handleMove(uint8_t dx, uint8_t dy) {
 	if (dx != 0 || dy != 0) {
+		// dy is negated two's complement
+		dy = (0x100 - dy) & 0xff;
+		DPRINTLN("MouseConverter.handleMove: [ dx="
+			+ String(dx) + ", dy=" + String(dy) + "]");
 		Mouse.move(dx, dy);
 	}
 }
 
 MouseConverter::handleButtons(uint8_t states) {
 	if ((states ^ buttonStates) != 0) { // any changes at all?
+		DPRINTLN("MouseConverter.handleButtons: " + String(states, HEX));
 		handleButton(states, BUTTON_LEFT_MASK, MOUSE_LEFT);
 		handleButton(states, BUTTON_MIDDLE_MASK, MOUSE_MIDDLE);
 		handleButton(states, BUTTON_RIGHT_MASK, MOUSE_RIGHT);

@@ -6,10 +6,14 @@
 
 *suniversal* is a USB adapter for *SUN Type 5* keyboards. It is developed on an *Arduino Pro Micro*, but other boards based on the *ATmega32u4* micro-controller should work as well.
 
+#### What's New
+I finally got hold of *SUN* mouse (model *Compact 1*, *SUN* no. 370-1586-03), so I could test and adapt my initial implementation for mouse support.
+
 #### Features
 - all keys working
 - boot protocol supported, i.e. works in BIOS
 - keyboard LEDs controlled by host
+- mouse support
 
 #### Compatibility
 | keyboard | status                                   |
@@ -18,9 +22,6 @@
 | Type 5   | confirmed working                        |
 | Type 4   | feedback wanted                          |
 | Type 3   | feedback wanted                          |
-
-#### Coming Soon
-- mouse support - most of this is already implemented, only I don't have an actual *SUN* mouse to test...
 
 
 ## Background
@@ -36,15 +37,17 @@ I finally settled for the *Arduino Pro Micro*. The *Micro* may also work, but I 
 
 The original cable can be unplugged from the keyboard's PCB, so it's easy to revert the modification should I ever desire to do so. The only thing to fabricate was a very simple harness to connect the *Arduino* with the PCB:
 
-| PCB pin | wire color* | function   | *Arduino* pin       |
+| PCB pin | wire color<sup>1</sup>|function| *Arduino* pin |
 |---------|-------------|------------|---------------------|
 |     1   |    black    |   GND      |      GND            |
 |     2   |    red      |   +5V      |      Vcc            |
-|     3   |    green    |  serial RX (from mouse)    | RX  |
+|     3   |    green    |  serial RX (from mouse)    | RX<sup>2</sup>|
 |     4   |    brown    |  serial TX (to keyboard)   | D9  |
 |     5   |    blue     |  serial RX (from keyboard) | D10 |
 
-*as found on a *Type 5c* keyboard, may differ depending on model & year
+<sup>1</sup> as found on a *Type 5c* keyboard, may differ depending on model & year
+
+<sup>2</sup> **Important**: Just like the keyboard, the mouse also uses an inverted serial signal, so you need an inverter in the line between the mouse and RX of the *Arduino*, e.g. a transistor and two resistors (schematic to follow soon). This is because unlike the `SoftwareSerial` we're using for the keyboard, the H/W serial of the *Arduino* cannot be configured to invert signals. Alternatively, maybe a second `SoftwareSerial` could be used, but I was under the impression that only one would work at a time. Let me know if that's not so.
 
 If you're not planning on using the mouse, you can skip that wire. The most challenging part may be finding the right plug to connect to the PCB. I fabricated something out of a connector that had the right pitch:
 
@@ -67,12 +70,13 @@ And here the mapping to the *Arduino* pins:
 |     1    | GND      |      GND             |
 |     2    | GND      |                      |
 |     3    | +5V      |      Vcc             |
-|     4    | serial RX (from mouse)    | RX  |
+|     4    | serial RX (from mouse)    | RX<sup>1</sup> |
 |     5    | serial TX (to keyboard)   | D9  |
 |     6    | serial RX (from keyboard) | D10 |
 |     7    | ?        |                      |
 |     8    | +5V      |                      |
 
+<sup>1</sup> see note in section for *Type 5c*
 
 ## Software
 
@@ -84,7 +88,7 @@ There are a few settings you can make in `config.h`, the more interesting ones b
 
 - `USE_MACROS` - When enabled, this assigns *macros* (short key stroke sequences) instead of the single USB key codes, to the special keys in the fun cluster (the eleven keys on the left). This is because mostly, those don't seem to have any effect unless you make according settings in the OS. So instead of sending e.g. the USB_COPY code, USB_CONTROL followed by USB_C will be sent. To add your own macros, have a look at `macros.cpp`. Macros are enabled by default.
 
-- `USE_MOUSE` - When enabled, the signals from a *SUN* mouse plugged into the keyboard will be forwarded to USB. (To be on the safe side, don't hot-plug the mouse.) **Note: This doesn't work yet!**
+- `USE_MOUSE` - When enabled, the signals from a *SUN* mouse plugged into the keyboard will be forwarded to USB. (To be on the safe side, don't hot-plug the mouse.)
 
 - `DEBUG` - You can enable debug mode with this, which will put diagnostic messages on the serial port. Additionally, the power key will turn into a reset button for the keyboard, so it's easier to observe start up messages. This is off by default.
 

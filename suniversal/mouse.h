@@ -27,7 +27,7 @@ class MouseConverter {
 
 private:
     uint8_t buttonStates;
-    uint8_t buffer[3];
+    uint8_t buffer[5];
     uint8_t bufferIx;
     handleMove(uint8_t dx, uint8_t dy);
     handleButtons(uint8_t state);
