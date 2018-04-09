@@ -59,23 +59,29 @@
 
 MouseConverter::MouseConverter() {
 	bufferIx = 0;
+	frameLength = 0;
+	fiveBytes = false;
 	Mouse.begin();
 }
 
 MouseConverter::update(uint8_t data) {
+	frameLength++;
 	// we need to sync on data frame start
 	if ((data & 0xf8) == DATA_FRAME_START) {
 		flushBuffer();
 		buffer[0] = data;
 		bufferIx = 1;
-	} else if (0 < bufferIx && bufferIx < array_len(buffer)) {
+		fiveBytes = frameLength == 5; // determine protocol
+		frameLength = 0;
+	} else if (bufferIx > 0) {
 		buffer[bufferIx++] = data;
+		flushBuffer();
 	}
 }
 
 MouseConverter::flushBuffer() {
-	if (bufferIx == 3 || bufferIx == 5) {
-		DPRINT("MouseConverter.update: [");
+	if ((bufferIx == 3 && !fiveBytes) || bufferIx == 5) {
+		DPRINT("MouseConverter.flushBuffer: [");
 		if (DEBUG) {
 			for (uint8_t i = 0; i < bufferIx; i++) {
 				DPRINT(" " + String(buffer[i], HEX));
@@ -87,6 +93,7 @@ MouseConverter::flushBuffer() {
 		if (bufferIx == 5) {
 			handleMove(buffer[3], buffer[4]);
 		}
+		bufferIx = 0;
 	}
 }
 
