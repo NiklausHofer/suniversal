@@ -27,7 +27,7 @@
 /*
     The mouse I tested this with is a model Compact 1, SUN no. 370-1586-03.
     This one uses the 5-byte Mousesystems protocol, not the 3-byte SUN
-    protocol (collected from Linux mouse man page):
+    protocol. Here it is, collected from Linux mouse man page:
 
     The Mousesystems protocol uses 1 start bit, 8 data bits, no parity
     and two stop bits at the speed of 1200 bits/sec. Data is sent to RxD
@@ -43,6 +43,9 @@
 	  3    0    dya6   dya5   dya4   dya3   dya2   dya1   dya0
       4    0    dxb6   dxb5   dxb4   dxb3   dxb2   dxb1   dxb0
       5    0    dyb6   dyb5   dyb4   dyb3   dyb2   dyb1   dyb0
+
+	The implementation below will however also automatically detect when the
+	3-byte SUN protocol is used.
 
 	http://www.rosenau-ka.de/ps2sun/
 
@@ -62,22 +65,27 @@ MouseConverter::MouseConverter() {
 MouseConverter::update(uint8_t data) {
 	// we need to sync on data frame start
 	if ((data & 0xf8) == DATA_FRAME_START) {
+		flushBuffer();
 		buffer[0] = data;
 		bufferIx = 1;
-	} else if (bufferIx > 0) {
+	} else if (0 < bufferIx && bufferIx < array_len(buffer)) {
 		buffer[bufferIx++] = data;
-		if (bufferIx == array_len(buffer)) {
-			DPRINT("MouseConverter.update: [");
-		    if (DEBUG) {
-		        for (uint8_t i = 0; i < array_len(buffer); i++) {
-		            DPRINT(" " + String(buffer[i], HEX));
-		        }
-		    }
-		    DPRINTLN(" ]");
-			handleButtons(buffer[0]);
-			handleMove(buffer[1], buffer[2]);
+	}
+}
+
+MouseConverter::flushBuffer() {
+	if (bufferIx == 3 || bufferIx == 5) {
+		DPRINT("MouseConverter.update: [");
+		if (DEBUG) {
+			for (uint8_t i = 0; i < bufferIx; i++) {
+				DPRINT(" " + String(buffer[i], HEX));
+			}
+		}
+		DPRINTLN(" ]");
+		handleButtons(buffer[0]);
+		handleMove(buffer[1], buffer[2]);
+		if (bufferIx == 5) {
 			handleMove(buffer[3], buffer[4]);
-			bufferIx = 0;
 		}
 	}
 }

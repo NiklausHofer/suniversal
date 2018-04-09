@@ -29,6 +29,7 @@ private:
     uint8_t buttonStates;
     uint8_t buffer[5];
     uint8_t bufferIx;
+    flushBuffer();
     handleMove(uint8_t dx, uint8_t dy);
     handleButtons(uint8_t state);
     handleButton(uint8_t states, uint8_t buttonMask, char buttonId);

@@ -91,7 +91,7 @@ There are a few settings you can make in `config.h`, the more interesting ones b
 
 - `USE_MACROS` - When enabled, this assigns *macros* (short key stroke sequences) instead of the single USB key codes, to the special keys in the fun cluster (the eleven keys on the left). This is because mostly, those don't seem to have any effect unless you make according settings in the OS. So instead of sending e.g. the USB_COPY code, USB_CONTROL followed by USB_C will be sent. To add your own macros, have a look at `macros.cpp`. Macros are enabled by default.
 
-- `USE_MOUSE` - When enabled, the signals from a *SUN* mouse plugged into the keyboard will be forwarded to USB. (To be on the safe side, don't hot-plug the mouse.)
+- `USE_MOUSE` - When enabled, the signals from a *SUN* mouse plugged into the keyboard will be forwarded to USB. Both 5-byte *Mousesystems* protocol and 3-byte *SUN* protocol are automatically handled. (To be on the safe side, don't hot-plug the mouse.)
 
 - `DEBUG` - You can enable debug mode with this, which will put diagnostic messages on the serial port. Additionally, the power key will turn into a reset button for the keyboard, so it's easier to observe start up messages. This is off by default.
 
