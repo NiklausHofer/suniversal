@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.4.1
+- mouse wheel emulation for vertical and horizontal scrolling
+- refactoring
+
 ## v0.4.0
 - mouse support: both 5-byte *Mousesystems* protocol and 3-byte *SUN* protocol are automatically handled
 
