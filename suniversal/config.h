@@ -13,6 +13,21 @@
 #define USE_MOUSE true
 
 
+// Set whether to emulate a mouse scroll wheel, i.e. scroll up/down and
+// left/right, when the mouse is moved up/down and left/right with the
+// middle mouse button being pressed.
+//
+#define EMULATE_SCROLL_WHEEL true
+
+
+// Set whether to invert scrolling. When set to true, the scrolling direction
+// is applied to the page instead of the view port. That is, moving the mouse
+// up/down with middle button pressed scrolls down/up, and moving left/right
+// scrolls right/left.
+//
+#define INVERTED_SCROLLING false
+
+
 // Set whether to use macros instead of single codes for the special keys in the
 // fun cluster.
 //

@@ -1,5 +1,5 @@
 /*
-    USB adapter
+    USB keyboard
     Copyright (c) 2018, Alexander Vollschwitz
 
     based on code from NicoHood's HID project, Copyright (c) 2014-2015, NicoHood
@@ -21,7 +21,7 @@
     along with suniversal. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "usb_adapter.h"
+#include "usb_keyboard.h"
 
 static const uint8_t hidReportDescriptorKeyboard[] PROGMEM = {
     //  Keyboard
@@ -74,7 +74,7 @@ static const uint8_t hidReportDescriptorKeyboard[] PROGMEM = {
 /*
 
  */
-USBAdapter::USBAdapter() :
+USBKeyboard::USBKeyboard() :
     PluggableUSBModule(1, 1, epType),
     protocol(HID_REPORT_PROTOCOL),
     idle(1),
@@ -91,7 +91,7 @@ USBAdapter::USBAdapter() :
     returns the number of bytes sent and increments the interfaceNum
     variable with the number of interfaces used
  */
-int USBAdapter::getInterface(uint8_t* interfaceCount) {
+int USBKeyboard::getInterface(uint8_t* interfaceCount) {
     *interfaceCount += 1; // uses 1
     HIDDescriptor hidInterface = {
         D_INTERFACE(
@@ -113,7 +113,7 @@ int USBAdapter::getInterface(uint8_t* interfaceCount) {
     module, 0 if the request has not been served, or -1 if errors have
     been encountered
  */
-int USBAdapter::getDescriptor(USBSetup& setup) {
+int USBKeyboard::getDescriptor(USBSetup& setup) {
     // Check if this is a HID Class Descriptor request and HID Class
     // Descriptor wIndex contains the interface number
     if (setup.bmRequestType != REQUEST_DEVICETOHOST_STANDARD_INTERFACE ||
@@ -134,7 +134,7 @@ int USBAdapter::getDescriptor(USBSetup& setup) {
     returns true if the request was directed to the module and executed
     correctly, false otherwise
  */
-bool USBAdapter::setup(USBSetup& setup) {
+bool USBKeyboard::setup(USBSetup& setup) {
 
     if (pluggedInterface != setup.wIndex) {
         return false;
@@ -215,21 +215,21 @@ bool USBAdapter::setup(USBSetup& setup) {
 /*
 
  */
-uint8_t USBAdapter::getLeds() {
+uint8_t USBKeyboard::getLeds() {
     return leds;
 }
 
 /*
 
  */
-uint8_t USBAdapter::getProtocol() {
+uint8_t USBKeyboard::getProtocol() {
     return protocol;
 }
 
 /*
 
  */
-USBAdapter::setFeatureReport(void* report, int length){
+USBKeyboard::setFeatureReport(void* report, int length){
     if(length > 0){
         featureReport = (uint8_t*)report;
         featureLength = length;
@@ -241,7 +241,7 @@ USBAdapter::setFeatureReport(void* report, int length){
 /*
 
  */
-int USBAdapter::availableFeatureReport() {
+int USBKeyboard::availableFeatureReport() {
     if(featureLength < 0){
         return featureLength & ~0x8000;
     }
@@ -251,28 +251,28 @@ int USBAdapter::availableFeatureReport() {
 /*
 
  */
-USBAdapter::enableFeatureReport() {
+USBKeyboard::enableFeatureReport() {
     featureLength &= ~0x8000;
 }
 
 /*
 
  */
-USBAdapter::disableFeatureReport() {
+USBKeyboard::disableFeatureReport() {
     featureLength |= 0x8000;
 }
 
 /*
 
  */
-USBAdapter::setReportData(ReportData* data) {
+USBKeyboard::setReportData(ReportData* data) {
     reportData = data;
 }
 
 /*
 
  */
-int USBAdapter::send() {
+int USBKeyboard::send() {
     return reportData != NULL ?
         USB_Send(pluggedEndpoint | TRANSFER_RELEASE,
             reportData, sizeof(ReportData)) : 0;
@@ -281,8 +281,8 @@ int USBAdapter::send() {
 /*
 
  */
-USBAdapter::wakeupHost() {
+USBKeyboard::wakeupHost() {
     USBDevice.wakeupHost();
 }
 
-USBAdapter usbAdapter;
+USBKeyboard usbKeyboard;

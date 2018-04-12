@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 
+#include "usb_mouse.h"
+
 class MouseConverter {
 
 private:
@@ -32,6 +34,7 @@ private:
     uint8_t frameLength;
     bool fiveBytes;
     flushBuffer();
+    handleScroll(uint8_t v, uint8_t h);
     handleMove(uint8_t dx, uint8_t dy);
     handleButtons(uint8_t state);
     handleButton(uint8_t states, uint8_t buttonMask, char buttonId);

@@ -24,7 +24,7 @@
 #ifndef KEYBOARD_CONVERTER_h
 #define KEYBOARD_CONVERTER_h
 
-#include "usb_adapter.h"
+#include "usb_keyboard.h"
 
 /*
     handles keys & modifiers

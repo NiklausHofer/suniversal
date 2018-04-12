@@ -231,7 +231,7 @@ void loop() {
                     resetKeyboard();
                     return;
                 } else {
-                    usbAdapter.wakeupHost();
+                    usbKeyboard.wakeupHost();
                 }
                 break;
             case COMPOSE:
@@ -277,7 +277,7 @@ void handleKey(uint8_t key) {
 }
 
 void updateLEDs() {
-    uint8_t leds = usbAdapter.getLeds();
+    uint8_t leds = usbKeyboard.getLeds();
     leds = ((leds & USB_LED_CAPS_LOCK) << 2) |
            ((leds & USB_LED_COMPOSE) >> 2) |
             (leds & (USB_LED_NUM_LOCK | USB_LED_SCROLL_LOCK));

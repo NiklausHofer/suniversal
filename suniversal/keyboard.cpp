@@ -32,7 +32,7 @@ MacroTable macros;
     key report
  */
 KeyReport::KeyReport() {
-    usbAdapter.setReportData(&data);
+    usbKeyboard.setReportData(&data);
     releaseAll();
     send();
 }
@@ -138,7 +138,7 @@ KeyReport::releaseAll() {
 
  */
 KeyReport::send() {
-    usbAdapter.send();
+    usbKeyboard.send();
     DPRINT("KeyReport.send: modifiers=" +
         String(data.modifiers, HEX) + ", keys=[");
     if (DEBUG) {

@@ -1,5 +1,5 @@
 /*
-    USB adapter
+    USB keyboard
     Copyright (c) 2018, Alexander Vollschwitz
 
     based on code from NicoHood's HID project, Copyright (c) 2014-2015, NicoHood
@@ -21,8 +21,8 @@
     along with suniversal. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef USB_ADAPTER_h
-#define USB_ADAPTER_h
+#ifndef USB_KEYBOARD_h
+#define USB_KEYBOARD_h
 
 #include <Arduino.h>
 #include <PluggableUSB.h>
@@ -62,7 +62,7 @@ typedef struct ReportData {
 /*
     for interfacing with USB
  */
-class USBAdapter : public PluggableUSBModule {
+class USBKeyboard : public PluggableUSBModule {
 
 private:
     uint8_t epType[1];
@@ -80,7 +80,7 @@ protected:
     bool setup(USBSetup& setup);
 
 public:
-    USBAdapter();
+    USBKeyboard();
     uint8_t getLeds();
     uint8_t getProtocol();
     setFeatureReport(void* report, int length);
@@ -92,6 +92,6 @@ public:
     wakeupHost();
 };
 
-extern USBAdapter usbAdapter;
+extern USBKeyboard usbKeyboard;
 
 #endif

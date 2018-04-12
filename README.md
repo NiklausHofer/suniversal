@@ -93,6 +93,8 @@ There are a few settings you can make in `config.h`, the more interesting ones b
 
 - `USE_MOUSE` - When enabled, the signals from a *SUN* mouse plugged into the keyboard will be forwarded to USB. Both 5-byte *Mousesystems* protocol and 3-byte *SUN* protocol are automatically handled. (To be on the safe side, don't hot-plug the mouse.)
 
+- `EMULATE_SCROLL_WHEEL` - When enabled, pressing the middle mouse button and moving the mouse emulates a scroll wheel, for vertical and horizontal scrolling.
+
 - `DEBUG` - You can enable debug mode with this, which will put diagnostic messages on the serial port. Additionally, the power key will turn into a reset button for the keyboard, so it's easier to observe start up messages. This is off by default.
 
 
