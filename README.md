@@ -4,10 +4,10 @@
 
 ## TL;DR
 
-*suniversal* is a USB adapter for *SUN Type 5* keyboards. It is developed on an *Arduino Pro Micro*, but other boards based on the *ATmega32u4* micro-controller should work as well.
+*suniversal* is a USB adapter for *SUN Type 5* keyboards. It is developed on a *Pro Micro Arduino-*compatible board, but other boards based on the *ATmega32u4* micro-controller should work as well.
 
 #### What's New
-I finally got hold of *SUN* mouse (model *Compact 1*, *SUN* no. 370-1586-03), so I could test and adapt my initial implementation for mouse support.
+I finally got hold of a *SUN* mouse (model *Compact 1*, *SUN* no. 370-1586-03), so I could test and adapt my initial implementation for mouse support.
 
 #### Features
 - all keys working
@@ -26,12 +26,17 @@ I finally got hold of *SUN* mouse (model *Compact 1*, *SUN* no. 370-1586-03), so
 
 ## Background
 
-A couple of years back, I bought a *SUN Type 5c* keyboard at the *VCFe* flea market, put it in the attic and forgot about it. A few days ago, it fell into my hands again while looking for something, and I thought it would be nice to make use of it. After cleaning it thoroughly, I considered the available options for connecting it to my Linux box. There are a few older projects, such as [here](http://ezhid.sourceforge.net/sunkbd.html), [here](http://snafu.priv.at/mystuff/sunkbd.html), and [here](http://kentie.net/article/sunkbd/), but they seemed too involved on the hardware side (require creating a PCB), compared to how cheap, small, and complete for example an *Arduino Pro Micro* board is. So, for the *Arduino* world, the best solution out there seemed to be Ben Rockwood's [SunType5_ArduinoAdapter](https://github.com/benr/SunType5_ArduinoAdapter), the only problem being that it does not make all keys available. Still good enough as a starting point.
+A couple of years back, I bought a *SUN Type 5c* keyboard at the *VCFe* flea market, put it in the attic and forgot about it. Then it fell into my hands again while looking for something, and I thought it would be nice to make use of it. After cleaning it thoroughly, I considered the available options for connecting it to my Linux box. There are a few older projects, such as [here](http://ezhid.sourceforge.net/sunkbd.html), [here](http://snafu.priv.at/mystuff/sunkbd.html), and [here](http://kentie.net/article/sunkbd/), but they seemed too involved on the hardware side (require creating a PCB), compared to how cheap, small, and complete *Arduino* boards are. So, for the *Arduino* world, the best solution out there seemed to be Ben Rockwood's [SunType5_ArduinoAdapter](https://github.com/benr/SunType5_ArduinoAdapter), the only problem being that it does not make all keys available. Still good enough as a starting point.
 
 
 ## Hardware
 
-I finally settled for a *Pro Micro*, an *Arduino*-compatible board developed by *Sparkfun* (e.g. [this one](https://www.sparkfun.com/products/12640)). The *Arduino Micro* may also work, but I haven't tested that. For an overview of available boards, [this table](https://en.wikipedia.org/wiki/List_of_Arduino_boards_and_compatible_systems) may help. Look for boards based on the *ATmega32u4*. Whichever board you choose, make sure it's 5V, since the RS232 signals from the keyboard are 5V TTL levels! Shortly after starting this project, I also got my hands on a *Type 5* in addition to the *Type 5c* I already had. For both, I decided to put the *Arduino* into the keyboard case (had to open them for cleaning anyway). The hardware is different for both, so here's how I went about it.
+I finally settled for a *Pro Micro*, an *Arduino*-compatible board developed by *Sparkfun* (e.g. [this one](https://www.sparkfun.com/products/12640)), but other boards may work as well. For an overview of available boards, [this table](https://en.wikipedia.org/wiki/List_of_Arduino_boards_and_compatible_systems) may help. Look for boards based on the *ATmega32u4*. So far, the following boards have been reported working:
+
+- *Sparkfun Pro Micro* (used by myself)
+- *Arduino Micro* (thanks to opthomas-prime)
+
+Whichever board you choose, make sure it's 5V, since the RS232 signals from the keyboard are 5V TTL levels! Shortly after starting this project, I also got my hands on a *Type 5* in addition to the *Type 5c* I already had. For both, I decided to put the *Arduino* into the keyboard case (had to open them for cleaning anyway). The hardware is different for both, so here's how I went about it.
 
 ### *Type 5c*
 
