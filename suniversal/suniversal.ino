@@ -112,37 +112,9 @@ void resetKeyboard() {
     clearFromBuffer(0);
     sun.write(CMD_RESET);
 
+    
+
     // if first byte is keyboard reset response, we consider that success
-    if (waitAndRead() == KBD_RESET_RESP) {
-
-        DPRINTLN("keyboard ok");
-        // wait for & discard the remainder of the response
-        waitForResponse(2);
-        clearFromBuffer(2);
-
-        if (USE_MACROS) {
-            keyboardConverter.setLayout(getLayout());
-        }
-
-        sun.write(cmdLED, 2); // reset LEDs
-
-        if (STARTUP_GREETING) {
-            flashLEDs(CAPS_LOCK_MASK);
-            flashLEDs(SCROLL_LOCK_MASK);
-            flashLEDs(NUM_LOCK_MASK);
-            flashLEDs(COMPOSE_MASK);
-            flashLEDs(ALL_LEDS);
-            beep(75);
-            beep(75);
-        }
-
-    } else {
-        DPRINTLN("keyboard broken");
-        keyboardBroken = true;
-        for (uint8_t i = 0; i < 8; i++) {
-            beep(125);
-        }
-    }
 }
 
 /*
