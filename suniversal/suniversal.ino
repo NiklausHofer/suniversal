@@ -185,7 +185,6 @@ void serialEventRun() {
 }
 
 void loop() {
-
     if (keyboardBroken) {
         flashLEDs(ALL_LEDS);
         return;
@@ -214,6 +213,9 @@ void loop() {
                         (cmdLED[1] & COMPOSE_MASK) == 0 ? 0 : 3;
                 }
                 break;
+            case 0xf0: // indicates key release
+                pressed = false;
+                continue;
             case -1: // shouldn't really happen
                 continue;
         }
@@ -231,12 +233,8 @@ void loop() {
             }
         }
 
-        if (key == 0xf0){
-          pressed = false;
-        } else {
-          handleKey(key, pressed);
-          pressed = true;
-        }
+        handleKey(key, pressed);
+        pressed = true;
     }
 }
 
