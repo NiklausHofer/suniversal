@@ -72,6 +72,7 @@ SoftwareSerial sun(PIN_RX, PIN_TX, false);
 
 // SNAFU flag
 bool keyboardBroken = false;
+bool pressed = true;
 
 // for turning off Compose key after next two key strokes
 uint8_t count_to_compose_off = 0;
@@ -258,18 +259,21 @@ void loop() {
             }
         }
 
-        handleKey(key);
+        if (key == 0xf0){
+          pressed = false;
+        } else {
+          handleKey(key, pressed);
+          pressed = true;
+        }
     }
 }
 
-void handleKey(uint8_t key) {
+void handleKey(uint8_t key, bool pressed) {
     if (key == KBD_IDLE) {
         DPRINTLN("suniversal: all released");
         keyboardConverter.releaseAll();
     } else {
-        bool pressed = (key & BREAK_BIT) == 0;
-        key &= (~BREAK_BIT); // mask out break bit
-        DPRINT("suniversal: " + String(key, HEX));
+        DPRINT("suniversal: 0x" + String(key, HEX));
         DPRINTLN(pressed ? " down" : " up");
         keyboardConverter.handleKey(key, pressed);
     }
