@@ -73,6 +73,7 @@ SoftwareSerial sun(PIN_RX, PIN_TX, false);
 // SNAFU flag
 bool keyboardBroken = false;
 bool pressed = true;
+uint8_t stupid_shit = 0;
 
 // for turning off Compose key after next two key strokes
 uint8_t count_to_compose_off = 0;
@@ -196,7 +197,13 @@ void loop() {
 
         int key = sun.read();
 
+        if (stupid_shit != 0 && key != 0xf0) {
+             key = key ^ stupid_shit;
+             stupid_shit = 0x00;
+        }
+
         switch (key) {
+          /*
             case POWER:
                 if (DEBUG) {
                     // in debug mode, power key resets keyboard
@@ -213,12 +220,22 @@ void loop() {
                         (cmdLED[1] & COMPOSE_MASK) == 0 ? 0 : 3;
                 }
                 break;
-            case 0xf0: // indicates key release
+          */
+            case 0xe1:
+                stupid_shit = 0xe1;
+                continue;
+            case 0xe0:
+                stupid_shit = 0xe0;
+                continue;
+            case 0xf0:
                 pressed = false;
+                continue;
+            case 0xf2: // 0xe0 ^ 0x12 - not sure why this even exists
                 continue;
             case -1: // shouldn't really happen
                 continue;
         }
+
 
         // check on every key release whether Compose needs to be switched off
         if ((key & BREAK_BIT) != 0) {
