@@ -68,7 +68,7 @@
 uint8_t cmdLED[2] = {CMD_LED, 0x00};
 
 // for communication with the SUN keyboard
-SoftwareSerial sun(PIN_RX, PIN_TX, true);
+SoftwareSerial sun(PIN_RX, PIN_TX, false);
 
 // SNAFU flag
 bool keyboardBroken = false;
@@ -92,8 +92,8 @@ void setup() {
         Serial1.begin(1200, SERIAL_8N2);
     }
 
-    sun.begin(1200);
-    resetKeyboard();
+    sun.begin(10500);
+    //resetKeyboard();
 }
 
 /*
