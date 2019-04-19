@@ -196,10 +196,10 @@ void loop() {
     while (sun.available() > 0) {
 
         int key = sun.read();
-
-        if (stupid_shit != 0 && key != 0xf0) {
-             key = key ^ stupid_shit;
-             stupid_shit = 0x00;
+        
+        if (KEYCODE_DEBUG) {
+            DPRINTLN("suniversal: 0x" + String(key, HEX));
+            continue;
         }
 
         switch (key) {
@@ -231,9 +231,13 @@ void loop() {
                 pressed = false;
                 continue;
             case 0xf2: // 0xe0 ^ 0x12 - not sure why this even exists
-                continue;
             case -1: // shouldn't really happen
                 continue;
+        }
+
+        if (stupid_shit != 0 && key != 0xf0) {
+             key = key ^ stupid_shit;
+             stupid_shit = 0x00;
         }
 
 
