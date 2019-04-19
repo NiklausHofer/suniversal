@@ -186,12 +186,12 @@ void serialEventRun() {
 }
 
 void loop() {
-    if (keyboardBroken) {
-        flashLEDs(ALL_LEDS);
-        return;
-    }
+    //if (keyboardBroken) {
+    //    flashLEDs(ALL_LEDS);
+    //    return;
+    //}
 
-    updateLEDs();
+    //updateLEDs();
 
     while (sun.available() > 0) {
 
